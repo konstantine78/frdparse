@@ -11,12 +11,12 @@ end_of_file = '#ENDOFFILE'
 # Open the file with a context manager.  It will automatically handle the opening and closing of the file.
 # Open the initial export file and loop through each line to remove any blank lines.  Write all "actual" lines
 # to the cleaned up version of the FRD export file, and read in its contents once again.
-with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/exportedfile.txt') as infile, open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/output.txt', 'x') as outfile:
+with open('/Users/kostas/MyPythonProjects/frdparse/exporttextfiles/exportedfile.txt') as infile, open('/Users/kostas/MyPythonProjects/frdparse/exporttextfiles/output.txt', 'x') as outfile:
     for line in infile:
         if not line.strip(): continue  # skip the empty line
         outfile.write(line)  # non-empty line. Write it to output
 
-with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/output.txt', 'r') as f:
+with open('/Users/kostas/MyPythonProjects/frdparse/exporttextfiles/output.txt', 'r') as f:
     file_contents = f.readlines()
 
 input_signals = list()
@@ -39,7 +39,7 @@ for line in file_contents:
     # If the line is an object identifier object, record the object ID, which will have the pattern of 'id_prefix' followed by numbers.
     if line.startswith('Obect Identifier: ' + id_prefix):
         theID = re.compile(r'\w+[0-9]').search(line)[0]
-        print('The Object identifier (ID) has been updated to: ' + theID)
+        #print('The Object identifier (ID) has been updated to: ' + theID)
 
     # Check if text is defining I/O signals.
     if ioparse.isIO(line) == True:
@@ -57,110 +57,34 @@ for line in file_contents:
     else:
         pass# This is a PLACEHOLDER for any non-IO or non-Conditional statements.
     
-with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/MyIOSignals.txt', 'w') as io_f:
-    io_f.write('*******************************************************************\n')
+with open('/Users/kostas/MyPythonProjects/frdparse/exporttextfiles/MyIOSignals.txt', 'w') as io_f:
     io_f.write('***********************INPUT SIGNALS*******************************\n')
-    io_f.write('*******************************************************************\n')
-
-    for i in range (len(input_signals)):
-        io_f.write('Signal Type: ' + input_signals[i].signal_type +'\n')
-        io_f.write('Abbreviated Data Type: ' + input_signals[i].datatype_abbreviated +'\n')
-        io_f.write('Data Type: ' + input_signals[i].datatype +'\n')
-        io_f.write('Signal Name: ' + input_signals[i].signal_name +'\n')
-        io_f.write('Reference ID: ' + input_signals[i].reference_id +'\n')
-        io_f.write('Input Source (if applicable): ' + input_signals[i].input_source +'\n')
-        io_f.write('-------------------------\n')
-    io_f.write('*******************************************************************\n')
+    ioparse.write_to_txt_output(input_signals, io_f)
     io_f.write('**********************OUTPUT SIGNALS*******************************\n')
-    io_f.write('*******************************************************************\n')
-    for i in range (len(output_signals)):
-        io_f.write('Signal Type: ' + output_signals[i].signal_type +'\n')
-        io_f.write('Abbreviated Data Type: ' + output_signals[i].datatype_abbreviated +'\n')
-        io_f.write('Data Type: ' + output_signals[i].datatype +'\n')
-        io_f.write('Signal Name: ' + output_signals[i].signal_name +'\n')
-        io_f.write('Reference ID: ' + output_signals[i].reference_id +'\n')
-        io_f.write('-------------------------\n')
-    io_f.write('*******************************************************************\n')
+    ioparse.write_to_txt_output(output_signals, io_f)
     io_f.write('**********************ALIGN CONSTANTS******************************\n')
-    io_f.write('*******************************************************************\n')    
-    for i in range (len(align_constants)):
-        io_f.write('Signal Type: ' + align_constants[i].signal_type +'\n')
-        io_f.write('Abbreviated Data Type: ' + align_constants[i].datatype_abbreviated +'\n')
-        io_f.write('Data Type: ' + align_constants[i].datatype +'\n')
-        io_f.write('Signal Name: ' + align_constants[i].signal_name +'\n')
-        io_f.write('Reference ID: ' + align_constants[i].reference_id +'\n')
-        io_f.write('Input Source (if applicable): ' + align_constants[i].input_source +'\n')
-        io_f.write('-------------------------\n')
-    io_f.write('*******************************************************************\n')
-    io_f.write('**********************DESIGN CONSTANTS*****************************\n')
-    io_f.write('*******************************************************************\n')    
-    for i in range (len(design_constants)):
-        io_f.write('Signal Type: ' + design_constants[i].signal_type +'\n')
-        io_f.write('Abbreviated Data Type: ' + design_constants[i].datatype_abbreviated +'\n')
-        io_f.write('Data Type: ' + design_constants[i].datatype +'\n')
-        io_f.write('Signal Name: ' + design_constants[i].signal_name +'\n')
-        io_f.write('Reference ID: ' + design_constants[i].reference_id +'\n')
-        io_f.write('Input Source (if applicable): ' + design_constants[i].input_source +'\n')
-        io_f.write('-------------------------\n')
-    io_f.write('*******************************************************************\n')
+    ioparse.write_to_txt_output(align_constants, io_f)  
+    io_f.write('**********************DESIGN CONSTANTS*****************************\n') 
+    ioparse.write_to_txt_output(design_constants, io_f)
     io_f.write('********************END OF SIGNALS LIST****************************\n')
-    io_f.write('*******************************************************************\n')
 
-with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/temp.csv', 'w') as csv_file:
+with open('/Users/kostas/MyPythonProjects/frdparse/exporttextfiles/temp.csv', 'w') as csv_file:
     csv_writer = csv.writer(csv_file, delimiter='\t')
 
     #Write the top header fields for columns
     csv_writer.writerow(['Signal Type', 'Data Type Abbrev.', 'Data Type', 'Signal Name', 'ID', 'Source ID'])
-    for i in range (len(input_signals)):
-        csv_writer.writerow(
-            [
-                input_signals[i].signal_type,
-                input_signals[i].datatype_abbreviated,
-                input_signals[i].datatype,
-                input_signals[i].signal_name,
-                input_signals[i].reference_id,
-                input_signals[i].input_source
-                ]
-            )
-    for i in range (len(output_signals)):
-        csv_writer.writerow(
-            [
-                output_signals[i].signal_type,
-                output_signals[i].datatype_abbreviated,
-                output_signals[i].datatype,
-                output_signals[i].signal_name,
-                output_signals[i].reference_id,
-                output_signals[i].input_source
-                ]
-            )
-    for i in range (len(align_constants)):
-        csv_writer.writerow(
-            [
-                align_constants[i].signal_type,
-                align_constants[i].datatype_abbreviated,
-                align_constants[i].datatype,
-                align_constants[i].signal_name,
-                align_constants[i].reference_id,
-                align_constants[i].input_source
-                ]
-            )
-    for i in range (len(design_constants)):
-        csv_writer.writerow(
-            [
-                design_constants[i].signal_type,
-                design_constants[i].datatype_abbreviated,
-                design_constants[i].datatype,
-                design_constants[i].signal_name,
-                design_constants[i].reference_id,
-                design_constants[i].input_source
-                ]
-            )
+    
+    ioparse.write_to_csv_output(input_signals, csv_writer)
+    ioparse.write_to_csv_output(output_signals, csv_writer)    
+    ioparse.write_to_csv_output(align_constants, csv_writer)    
+    ioparse.write_to_csv_output(design_constants, csv_writer)
 
-with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/temp.csv', 'r') as input:
-    with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/MyIOSignals.csv', 'w') as output:
+# Get rid of blank lines in the csv.
+with open('/Users/kostas/MyPythonProjects/frdparse/exporttextfiles/temp.csv', 'r') as input:
+    with open('/Users/kostas/MyPythonProjects/frdparse/exporttextfiles/MyIOSignals.csv', 'w') as output:
         non_blank_lines = (line for line in input if line.strip())
         output.writelines(non_blank_lines)
 
-os.chdir('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/')
+os.chdir('/Users/kostas/MyPythonProjects/frdparse/exporttextfiles/')
 os.remove('temp.csv')
 os.remove('output.txt')
