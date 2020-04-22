@@ -7,3 +7,7 @@ The main file is parse.py which parses through a text file.  The text file ident
 2. ioparse.py - Custom module that is imported into parse.py.  It defines class Signal as well as methods defined that are used within ioparse and parse.py.
 3. IOExportFile.txt - Source text file of requirements that parse.py parses through.
 4. IOExportFileCleanedUp.txt - File exists to store a cleaned up version of IOExportFile.txt, that has all blank lines removed.
+
+# Outputs
+1. MyIOSignals.txt - Text-based archive of all signals in source document, along with attributes for each signal.
+2. MyIOSignals.csv - Tab-delimited csv archive of all signals, along with attributes/fields for each, organized in table format.
