@@ -21,8 +21,9 @@ with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/output.txt'
 
 input_signals = list()
 output_signals = list()
-input_index = 0
-output_index = 0
+align_constants = list()
+design_constants = list()
+
 # Loop through the text file using the object identifier as a point of reference.  The assumption is that the object id
 # is at the beginning of the "section of text" in question, whether it be I/O definition or conditional statements.  We want
 # to loop through, identify those objects that represent I/O signals and then further loop through I/O statements to create
@@ -46,6 +47,11 @@ for line in file_contents:
             input_signals.append(io.stringToIOConvert(line, theID))
         else:            
             output_signals.append(io.stringToIOConvert(line, theID))
+    elif ioparse.isConstant(line) == True:
+        if line.startswith('AC:'):
+            align_constants.append(io.stringToIOConvert(line, theID))        
+        else:            
+            design_constants.append(io.stringToIOConvert(line, theID))
     elif ioparse.isConditional(line) == True:
         pass# This is a PLACEHOLDER for conditional statements.
     else:
@@ -73,6 +79,28 @@ with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/MyIOSignals
         io_f.write('Data Type: ' + output_signals[i].datatype +'\n')
         io_f.write('Signal Name: ' + output_signals[i].signal_name +'\n')
         io_f.write('Reference ID: ' + output_signals[i].reference_id +'\n')
+        io_f.write('-------------------------\n')
+    io_f.write('*******************************************************************\n')
+    io_f.write('**********************ALIGN CONSTANTS******************************\n')
+    io_f.write('*******************************************************************\n')    
+    for i in range (len(align_constants)):
+        io_f.write('Signal Type: ' + align_constants[i].signal_type +'\n')
+        io_f.write('Abbreviated Data Type: ' + align_constants[i].datatype_abbreviated +'\n')
+        io_f.write('Data Type: ' + align_constants[i].datatype +'\n')
+        io_f.write('Signal Name: ' + align_constants[i].signal_name +'\n')
+        io_f.write('Reference ID: ' + align_constants[i].reference_id +'\n')
+        io_f.write('Input Source (if applicable): ' + align_constants[i].input_source +'\n')
+        io_f.write('-------------------------\n')
+    io_f.write('*******************************************************************\n')
+    io_f.write('**********************DESIGN CONSTANTS*****************************\n')
+    io_f.write('*******************************************************************\n')    
+    for i in range (len(design_constants)):
+        io_f.write('Signal Type: ' + design_constants[i].signal_type +'\n')
+        io_f.write('Abbreviated Data Type: ' + design_constants[i].datatype_abbreviated +'\n')
+        io_f.write('Data Type: ' + design_constants[i].datatype +'\n')
+        io_f.write('Signal Name: ' + design_constants[i].signal_name +'\n')
+        io_f.write('Reference ID: ' + design_constants[i].reference_id +'\n')
+        io_f.write('Input Source (if applicable): ' + design_constants[i].input_source +'\n')
         io_f.write('-------------------------\n')
     io_f.write('*******************************************************************\n')
     io_f.write('********************END OF SIGNALS LIST****************************\n')
@@ -105,6 +133,28 @@ with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/temp.csv', 
                 output_signals[i].input_source
                 ]
             )
+    for i in range (len(align_constants)):
+        csv_writer.writerow(
+            [
+                align_constants[i].signal_type,
+                align_constants[i].datatype_abbreviated,
+                align_constants[i].datatype,
+                align_constants[i].signal_name,
+                align_constants[i].reference_id,
+                align_constants[i].input_source
+                ]
+            )
+    for i in range (len(design_constants)):
+        csv_writer.writerow(
+            [
+                design_constants[i].signal_type,
+                design_constants[i].datatype_abbreviated,
+                design_constants[i].datatype,
+                design_constants[i].signal_name,
+                design_constants[i].reference_id,
+                design_constants[i].input_source
+                ]
+            )
 
 with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/temp.csv', 'r') as input:
     with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/MyIOSignals.csv', 'w') as output:
@@ -113,3 +163,4 @@ with open('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/temp.csv', 
 
 os.chdir('/Users/kostas/MyPythonProjects/frdexports/exporttextfiles/')
 os.remove('temp.csv')
+os.remove('output.txt')
