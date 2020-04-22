@@ -11,6 +11,13 @@ def isIO(mystring):
     else: 
         return False
 
+def isConstant(mystring):
+    pattern = re.compile(r'AC:{1}|DC:{1}').search(mystring)
+    if pattern:
+        return True
+    else:
+        return False
+
 def isConditional(mystring):
     pattern = re.compile(r'C:').search(mystring)
     if pattern:
@@ -24,7 +31,6 @@ def getDataType(abbreviation):
     return DataTypes[abbreviation]
 
 class Signal:
-
     def __init__(self, signal_type, datatype_abbreviated, datatype, signal_name, reference_id, input_source):
         # initialize  here.
         self.signal_type = signal_type
@@ -49,29 +55,30 @@ class Signal:
         # the I/O data type, signal name, and signal type.  This function will strip all
         # spaces, then split the string into smaller chunks via referencing ':', '(', and ')'
         # This functions assumes string is of the following:
-        #           I: InputVariable1(F)(Source: HWCard2_3)
+        #           I: InputVariable1(F)(Source: GSCC2_3)
 
         s = s.replace(" ", "")
         # Define the regular expressions to use for pattern recognition and pulling appropriate text out downstream.
         signal_name_pattern = re.compile(r':(.*)\(.\)')
         input_source_pattern = re.compile(r'\(Source:(.*)\)' )
-        iotype_pattern = re.compile(r'I:{1}|O:{1}')
+        signal_type_pattern = re.compile(r'I:{1}|O:{1}|DC:{1}|AC:{1}')
         datatype_abbreviated_pattern = re.compile(r'\(([A-Z]*)\)')
 
-        # I/O signal name
+        # Signal name
         matched_string = signal_name_pattern.search(s)
         if matched_string: 
             signal_name = matched_string[1]
 
-        # Signal type; is it an input or output?
-        matched_string = iotype_pattern.search(s)
-        iotype = str(matched_string[0])[0]
+        # Signal type; is it an input, output, or constant?
+        matched_string = signal_type_pattern.search(s)
+        signal_type = str(matched_string[0])[0]
+
         if matched_string:
-            signal_type = SignalTypes[iotype]
+            signal_type = SignalTypes[signal_type]
 
         # Input source outputs get text string that makes it obvious there's no input source.
         matched_string = input_source_pattern.search(s)
-        if matched_string and iotype == 'I':
+        if matched_string and (signal_type == 'I' or signal_type == 'DC' or signal_type == 'AC'):
             input_source = matched_string[1]
         else: 
             input_source = 'N/A'
