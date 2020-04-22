@@ -1,4 +1,5 @@
 import re
+
 DataTypes = {'F':'float','B':'bool','I':'int', 'OM':'OperatingMode', 'UI':'unsigned int'}
 SignalTypes = {'I':'Input', 'O':'Output', 'A':'AlignmentConstant', 'D':'DesignConstant'}
 id_prefix = 'APPSW123333333'
@@ -30,6 +31,29 @@ def isConditional(mystring):
 def getDataType(abbreviation):
     return DataTypes[abbreviation]
 
+def write_to_txt_output(theList, txtwriter):
+    for i in range (len(theList)):
+        txtwriter.write('Signal Type: ' + theList[i].signal_type +'\n')
+        txtwriter.write('Abbreviated Data Type: ' + theList[i].datatype_abbreviated +'\n')
+        txtwriter.write('Data Type: ' + theList[i].datatype +'\n')
+        txtwriter.write('Signal Name: ' + theList[i].signal_name +'\n')
+        txtwriter.write('Reference ID: ' + theList[i].reference_id +'\n')
+        txtwriter.write('Input Source (if applicable): ' + theList[i].input_source +'\n')
+        txtwriter.write('-------------------------\n')
+ 
+def write_to_csv_output(theList, csvwriter):
+    for i in range (len(theList)):
+        csvwriter.writerow(
+            [
+                theList[i].signal_type,
+                theList[i].datatype_abbreviated,
+                theList[i].datatype,
+                theList[i].signal_name,
+                theList[i].reference_id,
+                theList[i].input_source
+                ]
+            )
+
 class Signal:
     def __init__(self, signal_type, datatype_abbreviated, datatype, signal_name, reference_id, input_source):
         # initialize  here.
@@ -47,7 +71,7 @@ class Signal:
     # Overwrites the signal's name.
     def setSignalName(self, name):
         self.signal_name = name
-    
+
     @classmethod
     # This class method will return an instance of Class Signal.
     def stringToIOConvert(cls, s, theID):
@@ -78,7 +102,8 @@ class Signal:
 
         # Input source outputs get text string that makes it obvious there's no input source.
         matched_string = input_source_pattern.search(s)
-        if matched_string and (signal_type == 'I' or signal_type == 'DC' or signal_type == 'AC'):
+
+        if matched_string and signal_type != 'Output':
             input_source = matched_string[1]
         else: 
             input_source = 'N/A'
