@@ -49,7 +49,7 @@ class Signal:
         # the I/O data type, signal name, and signal type.  This function will strip all
         # spaces, then split the string into smaller chunks via referencing ':', '(', and ')'
         # This functions assumes string is of the following:
-        #           I: InputVariable1(F)(Source: GSCC2_3)
+        #           I: InputVariable1(F)(Source: HWCard2_3)
 
         s = s.replace(" ", "")
         # Define the regular expressions to use for pattern recognition and pulling appropriate text out downstream.
