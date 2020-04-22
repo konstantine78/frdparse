@@ -2,6 +2,9 @@ Obect Identifier: APPSW1
 I: InputVariable1(F)(Source: HWCard4_2)
 I: InputVariable2(B)(Source: HWCard2_8)
 I: InputVariable3(F)(Source: APPSW123)
+AC: ALIGN_CONSTANT4(B)(Source: APPSW8674)
+AC: ALIGN_CONSTANT5(B)(Source: APPSW8674)
+DC: DESIGN_CONSTANT6(B)(Source: APPSW8675)
 
 Obect Identifier: APPSW123
 O: OutputVariable1(F)
@@ -15,6 +18,9 @@ R: OutputVariable3 = true; otherwise, OutputVariable3 = false
 Obect Identifier: APPSW3
 I: IntermediateVariable1(F)(Source: APPSW1)
 I: InputVariable4(B)(Source: HWCard4_65)
+AC: ALIGN_CONSTANT1(B)(Source: APPSW8674)
+AC: ALIGN_CONSTANT2(B)(Source: APPSW8674)
+DC: DESIGN_CONSTANT1(B)(Source: APPSW8675)
 
 Obect Identifier: APPSW4
 C: IF (InputVariable1 greater than InputVariable3) AND InputVariable2 = true)
