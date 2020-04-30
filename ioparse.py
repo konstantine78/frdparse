@@ -2,7 +2,6 @@ import re
 
 DataTypes = {'F':'float','B':'bool','I':'int', 'OM':'OperatingMode', 'UI':'unsigned int'}
 SignalTypes = {'I':'Input', 'O':'Output', 'A':'AlignmentConstant', 'D':'DesignConstant'}
-id_prefix = 'APPSW123333333'
 
 # Determine if the string is an input or output definition.  The first two characters must be an 'I:' or 'O:'
 def isIO(mystring):
@@ -31,15 +30,15 @@ def isConditional(mystring):
 def getDataType(abbreviation):
     return DataTypes[abbreviation]
 
-def write_to_txt_output(theList, txtwriter):
-    for i in range (len(theList)):
-        txtwriter.write('Signal Type: ' + theList[i].signal_type +'\n')
-        txtwriter.write('Abbreviated Data Type: ' + theList[i].datatype_abbreviated +'\n')
-        txtwriter.write('Data Type: ' + theList[i].datatype +'\n')
-        txtwriter.write('Signal Name: ' + theList[i].signal_name +'\n')
-        txtwriter.write('Reference ID: ' + theList[i].reference_id +'\n')
-        txtwriter.write('Input Source (if applicable): ' + theList[i].input_source +'\n')
-        txtwriter.write('-------------------------\n')
+#########def write_to_txt_output(theList, txtwriter):
+#########    for i in range (len(theList)):
+#########        txtwriter.write('Signal Type: ' + theList[i].signal_type +'\n')
+#########        txtwriter.write('Abbreviated Data Type: ' + theList[i].datatype_abbreviated +'\n')
+#########        txtwriter.write('Data Type: ' + theList[i].datatype +'\n')
+#########        txtwriter.write('Signal Name: ' + theList[i].signal_name +'\n')
+#########        txtwriter.write('Reference ID: ' + theList[i].reference_id +'\n')
+#########        txtwriter.write('Input Source (if applicable): ' + theList[i].input_source +'\n')
+#########        txtwriter.write('-------------------------\n')
  
 def write_to_csv_output(theList, csvwriter):
     for i in range (len(theList)):
@@ -67,10 +66,6 @@ class Signal:
     # Returns the signal's name.
     def getDataType(self):
         return '{}'.format(self.datatype)
-
-    # Overwrites the signal's name.
-    def setSignalName(self, name):
-        self.signal_name = name
 
     @classmethod
     # This class method will return an instance of Class Signal.

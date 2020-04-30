@@ -54,9 +54,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>170</y>
+      <y>210</y>
       <width>631</width>
-      <height>381</height>
+      <height>341</height>
      </rect>
     </property>
     <property name="widgetResizable">
@@ -68,16 +68,16 @@
        <x>0</x>
        <y>0</y>
        <width>629</width>
-       <height>379</height>
+       <height>339</height>
       </rect>
      </property>
-     <widget class="QTextEdit" name="textEdit">
+     <widget class="QTextEdit" name="output_terminal">
       <property name="geometry">
        <rect>
         <x>10</x>
         <y>10</y>
-        <width>611</width>
-        <height>361</height>
+        <width>601</width>
+        <height>321</height>
        </rect>
       </property>
      </widget>
@@ -106,7 +106,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>140</y>
+      <y>180</y>
       <width>211</width>
       <height>21</height>
      </rect>
@@ -119,6 +119,141 @@
     </property>
     <property name="text">
      <string>Output Terminal:</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="run_parse_button">
+    <property name="geometry">
+     <rect>
+      <x>150</x>
+      <y>90</y>
+      <width>71</width>
+      <height>61</height>
+     </rect>
+    </property>
+    <property name="toolTip">
+     <string>Run the Parser</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+    <property name="shortcut">
+     <string>Ctrl+Alt+R</string>
+    </property>
+    <property name="default">
+     <bool>false</bool>
+    </property>
+    <property name="flat">
+     <bool>false</bool>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="obj_id_prefix">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>121</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>70</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string>Object ID Prefix:</string>
+    </property>
+   </widget>
+   <widget class="QLineEdit" name="database_name">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>110</y>
+      <width>141</width>
+      <height>20</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox">
+    <property name="geometry">
+     <rect>
+      <x>360</x>
+      <y>80</y>
+      <width>141</width>
+      <height>91</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>MYSQL Database Action</string>
+    </property>
+    <widget class="QRadioButton" name="no_action_SQLdb_pb">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>111</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>No Action</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="create_SQLdb_pb">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>111</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Create Database</string>
+     </property>
+    </widget>
+    <widget class="QRadioButton" name="delete_SQLdb_pb">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>111</width>
+       <height>17</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Delete Database</string>
+     </property>
+    </widget>
+   </widget>
+   <widget class="QLabel" name="label_4">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>90</y>
+      <width>131</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="font">
+     <font>
+      <pointsize>12</pointsize>
+      <underline>true</underline>
+     </font>
+    </property>
+    <property name="text">
+     <string>Database Name:</string>
     </property>
    </widget>
   </widget>
