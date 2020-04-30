@@ -224,6 +224,7 @@ class Ui_MainWindow(object):
         print(help(Ui_MainWindow.exportFileDirButtonClicked))
         print(help(Ui_MainWindow.runParseButtonClicked))
         print(help(Ui_MainWindow.output_terminal_written))
+        print(help(parse.parse_export_file))
 
 if __name__ == "__main__":
     import sys

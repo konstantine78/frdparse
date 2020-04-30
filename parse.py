@@ -5,9 +5,24 @@ import ioparse
 from ioparse import Signal as io
 
 def parse_export_file(path, id_prefix):
-    # Open the file with a context manager.  It will automatically handle the opening and closing of the file.
-    # Open the initial export file and loop through each line to remove any blank lines.  Write all "actual" lines
-    # to the cleaned up version of the FRD export file, and read in its contents once again.
+    '''
+    ----------------------------------------------------------------------------------------------------------------------------
+    The parse_export_file function takes two arguments, path and id prefix.  This is used downstream to aid in 
+    parsing through a text file located in 'path' and searching for the id prefix.  Steps in this function are:
+    1. Open the exported text file.  Note, all opening of files is performed with context managers.
+    2. Remove empty lines and copy the conntents into a temporary file, 'output.txt'.
+    3. Open 'output.txt' and declare local lists that will retain class instances of Class Signal from ioparse.py.
+    4. Loop through the text file using the object identifier as a point of reference.  The assumption is that the object id
+    is at the beginning of the "section of text" in question, whether it be I/O definition or conditional statements.  We want
+    to loop through, identify those objects that represent I/O signals and then further loop through I/O statements to create
+    our lists of Signal class instances.  
+    5. Parsing is performed mostly via regular expression matched strings and general string manipulation.  At the heart of 
+    the parsing is the 'stringToIOConvert' method that is called from module ioparse.  This method is a classmethod
+    and will return the class, Signal, from ioparse and allow for instantiation local to parse.py.  
+    6. Once the lists are updated, and parsing has ceased, the lists are then written out to a *.csv file for archiving/use.
+    7. Temporary files are then deleted and the lists are returned once the method has completed running.
+    ----------------------------------------------------------------------------------------------------------------------------
+    '''
     path = path+'/'
     with open(path + 'exportedfile.txt') as infile, open(path + 'output.txt', 'x') as outfile:
         for line in infile:
@@ -22,24 +37,19 @@ def parse_export_file(path, id_prefix):
     align_constants = list()
     design_constants = list()
 
-    # Loop through the text file using the object identifier as a point of reference.  The assumption is that the object id
-    # is at the beginning of the "section of text" in question, whether it be I/O definition or conditional statements.  We want
-    # to loop through, identify those objects that represent I/O signals and then further loop through I/O statements to create
-    # our lists of Signal class instances.  
+    # Parsing starts now.
     for line in file_contents:
-        # Strip the whitespace at beginning and end of the line.
         line.strip() 
 
-        # If we're at the last line (i.e., the end) break out of this.
+        # At EOF; therefore, we're done.
         if line.startswith('#ENDOFFILE'):
             pass
         
-        # If the line is an object identifier object, record the object ID, which will have the pattern of 'id_prefix' followed by numbers.
+        # Record the Object ID to theID, as it is used in all instances of class Signal below.  Everything has an Object ID.
         if line.startswith('Obect Identifier: ' + id_prefix):
             theID = re.compile(r'\w+[0-9]').search(line)[0]
-            #print('The Object identifier (ID) has been updated to: ' + theID)
 
-        # Check if text is defining I/O signals.
+        # Check beginning of each line for I/O-specific syntax.
         if ioparse.isIO(line) == True:
             if line.startswith('I:'):
                 input_signals.append(io.stringToIOConvert(line, theID))
@@ -54,18 +64,8 @@ def parse_export_file(path, id_prefix):
             pass# This is a PLACEHOLDER for conditional statements.
         else:
             pass# This is a PLACEHOLDER for any non-IO or non-Conditional statements.
-    #############DELETE MIOSignals.txt generation later.  Unecessary.    
-    #############with open(path + 'MyIOSignals.txt', 'w') as io_f:
-    #############    io_f.write('***********************INPUT SIGNALS*******************************\n')
-    #############    ioparse.write_to_txt_output(input_signals, io_f)
-    #############    io_f.write('**********************OUTPUT SIGNALS*******************************\n')
-    #############    ioparse.write_to_txt_output(output_signals, io_f)
-    #############    io_f.write('**********************ALIGN CONSTANTS******************************\n')
-    #############    ioparse.write_to_txt_output(align_constants, io_f)  
-    #############    io_f.write('**********************DESIGN CONSTANTS*****************************\n') 
-    #############    ioparse.write_to_txt_output(design_constants, io_f)
-    #############    io_f.write('********************END OF SIGNALS LIST****************************\n')
 
+    # Write to a temporary *.csv file.
     with open(path + 'temp.csv', 'w') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter='\t')
 
@@ -77,16 +77,16 @@ def parse_export_file(path, id_prefix):
         ioparse.write_to_csv_output(align_constants, csv_writer)    
         ioparse.write_to_csv_output(design_constants, csv_writer)
 
-    # Get rid of blank lines in the csv.
+    # Get rid of blank lines in the csv and output the final *.csv file.
     with open(path + 'temp.csv', 'r') as input:
         with open(path + 'MyIOSignals.csv', 'w') as output:
             non_blank_lines = (line for line in input if line.strip())
             output.writelines(non_blank_lines)
 
-    #Clean up.  Delete temporary intermediate files.
+    #Clean up.  Delete temporary/intermediate files.
     os.chdir(path)
     os.remove('temp.csv')
     os.remove('output.txt')
 
     # Return the lists for use downstream in creation of mysql database.
-    return input_signals
+    return input_signals, output_signals, align_constants, design_constants
