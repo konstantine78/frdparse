@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from user_defined import *
 import sys
 import parse
-
+import mysql_lib
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -60,7 +60,7 @@ class Ui_MainWindow(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 629, 379))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 629, 339))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.output_terminal = QtWidgets.QTextEdit(self.scrollAreaWidgetContents)
         self.output_terminal.setGeometry(QtCore.QRect(10, 10, 601, 321))
@@ -121,6 +121,9 @@ class Ui_MainWindow(object):
         font.setUnderline(True)
         self.label_4.setFont(font)
         self.label_4.setObjectName("label_4")
+        self.sqldb_action_pb = QtWidgets.QPushButton(self.centralwidget)
+        self.sqldb_action_pb.setGeometry(QtCore.QRect(510, 140, 141, 31))
+        self.sqldb_action_pb.setObjectName("sqldb_action_pb")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 676, 21))
@@ -133,7 +136,10 @@ class Ui_MainWindow(object):
         MainWindow.setStatusBar(self.statusbar)
         self.actionSave = QtWidgets.QAction(MainWindow)
         self.actionSave.setObjectName("actionSave")
+        self.actionHelp = QtWidgets.QAction(MainWindow)
+        self.actionHelp.setObjectName("actionHelp")
         self.menuFile.addAction(self.actionSave)
+        self.menuFile.addAction(self.actionHelp)
         self.menubar.addAction(self.menuFile.menuAction())
 
         # Install a custom output stream by connecting sys.stdout to instance of EmmittingStream.
@@ -145,10 +151,14 @@ class Ui_MainWindow(object):
         Connectors in the UI file:
         1. Clicking of export_dir_pb will trigger the exportFileDirButtonClicked method.
         2. Clicking of run_parse_button will trigger the runParseButtonClicked method.
+        3. Triggering the Help action from menu will trigger the help_Ui method.
+        4. Clicking the sqldb_action_pb will trigger the sqlDatabaseTakeAction method.
         ----------------------------------
         '''
         self.export_dir_pb.clicked.connect(self.exportFileDirButtonClicked)
         self.run_parse_button.clicked.connect(self.runParseButtonClicked)
+        self.actionHelp.triggered.connect(self.help_Ui)
+        self.sqldb_action_pb.clicked.connect(self.sqlDatabaseTakeAction)
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -168,10 +178,14 @@ class Ui_MainWindow(object):
         self.create_SQLdb_pb.setText(_translate("MainWindow", "Create Database"))
         self.delete_SQLdb_pb.setText(_translate("MainWindow", "Delete Database"))
         self.label_4.setText(_translate("MainWindow", "Database Name:"))
+        self.sqldb_action_pb.setText(_translate("MainWindow", "Execute Database Action"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.actionSave.setText(_translate("MainWindow", "Save"))
         self.actionSave.setStatusTip(_translate("MainWindow", "Save output file"))
         self.actionSave.setShortcut(_translate("MainWindow", "Ctrl+S"))
+        self.actionHelp.setText(_translate("MainWindow", "Help"))
+        self.actionHelp.setStatusTip(_translate("MainWindow", "Run this for help on tool\'s functions."))
+        self.actionHelp.setShortcut(_translate("MainWindow", "Ctrl+Shift+H"))
 
     # Custom UI Methods
     def exportFileDirButtonClicked(self):
@@ -190,16 +204,16 @@ class Ui_MainWindow(object):
         '''
         ----------------------------------
          Method 'runParseButtonClicked':
-         Parses through the export text file.  The function will need to know the file's directory path
-         and the object ID prefix within the document.  It returns the various lists needed downstream to
-         create tables in the mysql database.
+         Parses through the export text file.  The method will need to know the file's directory path
+         and the object ID prefix within the document.  At the core of this method is the call to parse_export_file.  That
+         method will return the various lists needed downstream to create tables in the mysql database.
         ----------------------------------
         '''
-        if self.export_dir.text() == '' or self.obj_id_prefix.text() == '':
+        if str(self.export_dir.text()).strip() == '' or str(self.obj_id_prefix.text()).strip() == '':
             print('Your directory path and/or Object ID prefix are empty.')
         else:
             try:
-                self.inputs = parse.parse_export_file(self.export_dir.text(), self.obj_id_prefix.text())
+                self.inputs, self.ouputs, self.alignconsts, self.designconsts = parse.parse_export_file(self.export_dir.text(), self.obj_id_prefix.text())
                 print('Function parse_export_file form parse.py is being run.')
                 print('Executing parsing on text file in ' + self.export_dir.text() + '\nObject ID Prefix is: ' + self.obj_id_prefix.text())
             except ValueError:
@@ -219,11 +233,33 @@ class Ui_MainWindow(object):
         self.output_terminal.setTextCursor(cursor)
         self.output_terminal.ensureCursorVisible()
 
+    def sqlDatabaseTakeAction(self):
+        '''
+        ----------------------------------
+         Method 'sqlDatabaseTakeAction':
+         Can either create or delete a MySQL database, provided the database's name is specified
+         in the GUI and the appropriate database action radio button is checked.  This method calls either
+         create_database or delete_database, depending on the action.  Create database must check if the lists
+         that runParseButtonClicked updated are not empty.
+        ----------------------------------
+        '''
+        if str(self.database_name.text()).strip() == '':
+                print('The database name is blank.  Please edit.')
+        elif self.create_SQLdb_pb.isChecked():
+            mysql_lib.create_database(self.database_name.text())
+            self.no_action_SQLdb_pb.setChecked(True) # Prevent inadvertent action taken after creation.
+        elif self.delete_SQLdb_pb.isChecked():
+            mysql_lib.delete_database(self.database_name.text())
+            self.no_action_SQLdb_pb.setChecked(True) # Prevent inadvertent action taken after deletion.
+        else: # do nothing.
+            self.no_action_SQLdb_pb.setChecked(True)
+    
     def help_Ui(self):
         print(help(Ui_MainWindow.setupUi))
         print(help(Ui_MainWindow.exportFileDirButtonClicked))
         print(help(Ui_MainWindow.runParseButtonClicked))
         print(help(Ui_MainWindow.output_terminal_written))
+        print(help(Ui_MainWindow.sqlDatabaseTakeAction))
         print(help(parse.parse_export_file))
 
 if __name__ == "__main__":

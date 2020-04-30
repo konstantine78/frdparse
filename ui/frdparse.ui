@@ -256,6 +256,19 @@
      <string>Database Name:</string>
     </property>
    </widget>
+   <widget class="QPushButton" name="sqldb_action_pb">
+    <property name="geometry">
+     <rect>
+      <x>510</x>
+      <y>140</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Execute Database Action</string>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -271,6 +284,7 @@
      <string>File</string>
     </property>
     <addaction name="actionSave"/>
+    <addaction name="actionHelp"/>
    </widget>
    <addaction name="menuFile"/>
   </widget>
@@ -284,6 +298,17 @@
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
+   </property>
+  </action>
+  <action name="actionHelp">
+   <property name="text">
+    <string>Help</string>
+   </property>
+   <property name="statusTip">
+    <string>Run this for help on tool's functions.</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+H</string>
    </property>
   </action>
  </widget>
