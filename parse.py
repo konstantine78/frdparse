@@ -2,7 +2,7 @@ import re
 import csv
 import os
 import ioparse
-from ioparse import Signal as io
+from ioparse import Data as data
 
 def parse_export_file(path, id_prefix):
     '''
@@ -36,6 +36,7 @@ def parse_export_file(path, id_prefix):
     output_signals = list()
     align_constants = list()
     design_constants = list()
+    theKey = 'UNKNOWN'
 
     # Parsing starts now.
     for line in file_contents:
@@ -49,28 +50,31 @@ def parse_export_file(path, id_prefix):
         if line.startswith('Obect Identifier: ' + id_prefix):
             theID = re.compile(r'\w+[0-9]').search(line)[0]
 
-        # Check beginning of each line for I/O-specific syntax.
-        if ioparse.isIO(line) == True:
-            if line.startswith('I:'):
-                input_signals.append(io.stringToIOConvert(line, theID))
-            else:            
-                output_signals.append(io.stringToIOConvert(line, theID))
-        elif ioparse.isConstant(line) == True:
-            if line.startswith('AC:'):
-                align_constants.append(io.stringToIOConvert(line, theID))        
-            else:            
-                design_constants.append(io.stringToIOConvert(line, theID))
-        elif ioparse.isConditional(line) == True:
-            pass# This is a PLACEHOLDER for conditional statements.
+        # Check beginning of each line for Data-specific syntax.
+        if line.startswith('I:'):
+            input_signals.append(data.ConvertStringToData(line, ioparse.DataSyntaxDict.get('I'), theID))
+        if line.startswith('O:'):
+            output_signals.append(data.ConvertStringToData(line, ioparse.DataSyntaxDict.get('O'), theID))
+        if line.startswith('AC:'):
+            align_constants.append(data.ConvertStringToData(line, ioparse.DataSyntaxDict.get('AC'), theID))
+        if line.startswith('DC:'):
+            design_constants.append(data.ConvertStringToData(line, ioparse.DataSyntaxDict.get('DC'), theID))
+        if line.startswith('LV:'):
+            pass# This is a PLACEHOLDER
+        if line.startswith('F:'):
+            pass# This is a PLACEHOLDER
         else:
-            pass# This is a PLACEHOLDER for any non-IO or non-Conditional statements.
+            pass# This is a PLACEHOLDER
 
     # Write to a temporary *.csv file.
     with open(path + 'temp.csv', 'w') as csv_file:
         csv_writer = csv.writer(csv_file, delimiter='\t')
 
         #Write the top header fields for columns
-        csv_writer.writerow(['Signal Type', 'Data Type Abbrev.', 'Data Type', 'Signal Name', 'ID', 'Source ID'])
+        csv_writer.writerow(
+            ['Name', 'Data Type', 'Data Type Abbrev.', 'Object ID', 
+            'Source', 'Destination', 'Units', 'Default Value', 'Minimum Value', 'Maximum Value']
+            )
 
         ioparse.write_to_csv_output(input_signals, csv_writer)
         ioparse.write_to_csv_output(output_signals, csv_writer)    
