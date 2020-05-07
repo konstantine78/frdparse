@@ -6,6 +6,10 @@ AC: ALIGN_CONSTANT99(B)(Source: APPSW9000)
 AC: ALIGN_CONSTANT98(B)(Source: APPSW9000)
 DC: DESIGN_CONSTANT97(B)(Source: APPSW9001)
 
+Obect Identifier: APPSW68686
+F: HighVoltageFault(0x123abc78, "The voltage is too high!", 0, 10)
+F: LowVoltageFault(0xdeadb33f, "The voltage is too low!", 0, 5)
+
 Obect Identifier: APPSW123
 O: OutputVariable1(F)
 O: OutputVariable2(F)
@@ -59,6 +63,10 @@ DC: DESIGN_CONST646(B)(Source: APPSW9001_15)
 
 Obect Identifier: APPSW456
 O: OutputVariable4343(B)
+
+Obect Identifier: APPSW92938
+F: DivideByZeroFault(0xabcdef12, "You're dividing by zero!", 0, 1)
+F: SwitchFailedFault(0xffffaaaa, "The switch is broken.", 0, 1)
 
 Obect Identifier: APPSW778
 C: IF ((InputVariable9 greater than DESIGN_CONST646) AND

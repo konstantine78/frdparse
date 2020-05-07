@@ -1,4 +1,6 @@
 import re
+import csv
+import os
 
 DataTypesDict = {'F':'float','B':'bool','I':'int', 'OM':'OperatingMode', 'UI':'unsigned int'}
 DataSyntaxDict = {'I':'Input', 'O':'Output', 'AC':'AlignConst', 'DC':'DesignConst', 'LV':'LocalVar', 'F':'Fault'}
@@ -45,7 +47,7 @@ def is_int(value):
   except:
     return False
  
-def write_to_csv_output(theList, csvwriter):
+def write_data_to_csv_output(theList, csvwriter):
     for i in range (len(theList)):
         csvwriter.writerow(
             [
@@ -61,6 +63,32 @@ def write_to_csv_output(theList, csvwriter):
                 theList[i].maxvalue,
                 ]
             )
+
+def write_faults_to_csv_output(theList, csvwriter):
+    for i in range (len(theList)):
+        csvwriter.writerow(
+            [
+                theList[i].objectID,
+                theList[i].faultname,
+                theList[i].faultcode,
+                theList[i].faultdescr,
+                theList[i].faultcumlimit,
+                theList[i].faultconlimit,
+                ]
+            )
+
+def csv_file_cleanup(path, infile, outfile, delete=False):
+    with open(path + infile, 'r') as input:
+        with open(path + outfile, 'w') as output:
+            non_blank_lines = (line for line in input if line.strip())
+            output.writelines(non_blank_lines)
+    if delete == True:
+        delete_file(path, infile)    
+
+def delete_file(path, file):
+    os.chdir(path)
+    os.remove(file)
+    print(path+file+' has been deleted.')
 
 class Data:
     def __init__(self, name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue):
@@ -210,27 +238,25 @@ class Fault:
     
     @classmethod
     def ConvertStringToFault(cls, fullstring, ID):
+        
+        # Define the Object ID
         objectID = ID
-
-        # Delete spaces.
-        fullstring = fullstring.replace(' ', '')
 
         # Define the regular expressions to use for pattern recognition.
         faultname_pattern = re.compile(r':(.*)\(')
         faultcode_pattern = re.compile(r'\b0[xX][a-f0-9A-F]+\b')
 
-        #F: MyFaultName(0xaEAD1eEF, "This is my fault description.", 0, 3)
-        #I:InputsignalName(F)(Source:APPSW1234)
+        string_no_spaces = fullstring.replace(' ', '')
 
         # Name
-        matched_string = faultname_pattern.search(fullstring.replace(' ', ''))
+        matched_string = faultname_pattern.search(string_no_spaces)
         if matched_string: 
             faultname = matched_string[1]
         else:
             faultname = 'UNKNOWN'
 
         # Code
-        matched_string = faultcode_pattern.search(fullstring.replace(' ', ''))
+        matched_string = faultcode_pattern.search(string_no_spaces)
         if matched_string: 
             faultcode = matched_string[0]
         else:
@@ -240,9 +266,9 @@ class Fault:
         faultdescr = fullstring.split('\"')[1]
 
         # Cumulative Limit
-        faultcumlimit = fullstring.split('\"')[2].split(',')[1].strip()
+        faultcumlimit = string_no_spaces.split('\"')[2].split(',')[1].strip()
 
         # Consecutive Limit
-        faultconlimit = fullstring.split('\"')[2].split(',')[2].split(')')[0].strip()
+        faultconlimit = string_no_spaces.split('\"')[2].split(',')[2].split(')')[0].strip()
 
         return cls(objectID, faultname, faultcode, faultdescr, faultcumlimit, faultconlimit)
