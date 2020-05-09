@@ -124,17 +124,17 @@
    <widget class="QPushButton" name="run_parse_button">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>90</y>
+      <x>30</x>
+      <y>130</y>
       <width>71</width>
-      <height>61</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="toolTip">
      <string>Run the Parser</string>
     </property>
     <property name="text">
-     <string/>
+     <string>PARSE FILE</string>
     </property>
     <property name="shortcut">
      <string>Ctrl+Alt+R</string>
@@ -175,98 +175,17 @@
      <string>Object ID Prefix:</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="database_name">
+   <widget class="QPushButton" name="sqlDialog_Open_pb">
     <property name="geometry">
      <rect>
-      <x>510</x>
+      <x>350</x>
       <y>110</y>
-      <width>141</width>
-      <height>20</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QGroupBox" name="groupBox">
-    <property name="geometry">
-     <rect>
-      <x>360</x>
-      <y>80</y>
-      <width>141</width>
-      <height>91</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>MYSQL Database Action</string>
-    </property>
-    <widget class="QRadioButton" name="no_action_SQLdb_pb">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>60</y>
-       <width>111</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>No Action</string>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="create_SQLdb_pb">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>20</y>
-       <width>111</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Create Database</string>
-     </property>
-    </widget>
-    <widget class="QRadioButton" name="delete_SQLdb_pb">
-     <property name="geometry">
-      <rect>
-       <x>10</x>
-       <y>40</y>
-       <width>111</width>
-       <height>17</height>
-      </rect>
-     </property>
-     <property name="text">
-      <string>Delete Database</string>
-     </property>
-    </widget>
-   </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>510</x>
-      <y>90</y>
-      <width>131</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>12</pointsize>
-      <underline>true</underline>
-     </font>
-    </property>
-    <property name="text">
-     <string>Database Name:</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="sqldb_action_pb">
-    <property name="geometry">
-     <rect>
-      <x>510</x>
-      <y>140</y>
-      <width>141</width>
+      <width>71</width>
       <height>31</height>
      </rect>
     </property>
     <property name="text">
-     <string>Execute Database Action</string>
+     <string>SQL Dialog</string>
     </property>
    </widget>
   </widget>

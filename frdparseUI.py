@@ -4,6 +4,7 @@ import parse
 import mysql_lib
 from user_defined import *
 
+####################### END OF PYUIC5 Generated Python Code#############################################
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
@@ -48,8 +49,7 @@ class Ui_MainWindow(object):
         self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
         self.run_parse_button = QtWidgets.QPushButton(self.centralwidget)
-        self.run_parse_button.setGeometry(QtCore.QRect(150, 90, 71, 61))
-        self.run_parse_button.setText("")
+        self.run_parse_button.setGeometry(QtCore.QRect(30, 130, 71, 31))
         self.run_parse_button.setDefault(False)
         self.run_parse_button.setFlat(False)
         self.run_parse_button.setObjectName("run_parse_button")
@@ -63,31 +63,9 @@ class Ui_MainWindow(object):
         font.setUnderline(True)
         self.label_3.setFont(font)
         self.label_3.setObjectName("label_3")
-        self.database_name = QtWidgets.QLineEdit(self.centralwidget)
-        self.database_name.setGeometry(QtCore.QRect(510, 110, 141, 20))
-        self.database_name.setObjectName("database_name")
-        self.groupBox = QtWidgets.QGroupBox(self.centralwidget)
-        self.groupBox.setGeometry(QtCore.QRect(360, 80, 141, 91))
-        self.groupBox.setObjectName("groupBox")
-        self.no_action_SQLdb_pb = QtWidgets.QRadioButton(self.groupBox)
-        self.no_action_SQLdb_pb.setGeometry(QtCore.QRect(10, 60, 111, 17))
-        self.no_action_SQLdb_pb.setObjectName("no_action_SQLdb_pb")
-        self.create_SQLdb_pb = QtWidgets.QRadioButton(self.groupBox)
-        self.create_SQLdb_pb.setGeometry(QtCore.QRect(10, 20, 111, 17))
-        self.create_SQLdb_pb.setObjectName("create_SQLdb_pb")
-        self.delete_SQLdb_pb = QtWidgets.QRadioButton(self.groupBox)
-        self.delete_SQLdb_pb.setGeometry(QtCore.QRect(10, 40, 111, 17))
-        self.delete_SQLdb_pb.setObjectName("delete_SQLdb_pb")
-        self.label_4 = QtWidgets.QLabel(self.centralwidget)
-        self.label_4.setGeometry(QtCore.QRect(510, 90, 131, 21))
-        font = QtGui.QFont()
-        font.setPointSize(12)
-        font.setUnderline(True)
-        self.label_4.setFont(font)
-        self.label_4.setObjectName("label_4")
-        self.sqldb_action_pb = QtWidgets.QPushButton(self.centralwidget)
-        self.sqldb_action_pb.setGeometry(QtCore.QRect(510, 140, 141, 31))
-        self.sqldb_action_pb.setObjectName("sqldb_action_pb")
+        self.sqlDialog_Open_pb = QtWidgets.QPushButton(self.centralwidget)
+        self.sqlDialog_Open_pb.setGeometry(QtCore.QRect(350, 110, 71, 31))
+        self.sqlDialog_Open_pb.setObjectName("sqlDialog_Open_pb")
         MainWindow.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 676, 21))
@@ -117,14 +95,10 @@ class Ui_MainWindow(object):
         self.label.setText(_translate("MainWindow", "Set export directory:"))
         self.label_2.setText(_translate("MainWindow", "Output Terminal:"))
         self.run_parse_button.setToolTip(_translate("MainWindow", "Run the Parser"))
+        self.run_parse_button.setText(_translate("MainWindow", "PARSE FILE"))
         self.run_parse_button.setShortcut(_translate("MainWindow", "Ctrl+Alt+R"))
         self.label_3.setText(_translate("MainWindow", "Object ID Prefix:"))
-        self.groupBox.setTitle(_translate("MainWindow", "MYSQL Database Action"))
-        self.no_action_SQLdb_pb.setText(_translate("MainWindow", "No Action"))
-        self.create_SQLdb_pb.setText(_translate("MainWindow", "Create Database"))
-        self.delete_SQLdb_pb.setText(_translate("MainWindow", "Delete Database"))
-        self.label_4.setText(_translate("MainWindow", "Database Name:"))
-        self.sqldb_action_pb.setText(_translate("MainWindow", "Execute Database Action"))
+        self.sqlDialog_Open_pb.setText(_translate("MainWindow", "SQL Dialog"))
         self.menuFile.setTitle(_translate("MainWindow", "File"))
         self.actionSave.setText(_translate("MainWindow", "Save"))
         self.actionSave.setStatusTip(_translate("MainWindow", "Save output file"))
@@ -132,6 +106,81 @@ class Ui_MainWindow(object):
         self.actionHelp.setText(_translate("MainWindow", "Help"))
         self.actionHelp.setStatusTip(_translate("MainWindow", "Run this for help on tool\'s functions."))
         self.actionHelp.setShortcut(_translate("MainWindow", "Ctrl+Shift+H"))
+
+class Ui_SQLDialog(object):
+    def setupUi(self, SQLDialog):
+        SQLDialog.setObjectName("SQLDialog")
+        SQLDialog.setWindowModality(QtCore.Qt.WindowModal)
+        SQLDialog.resize(447, 170)
+        self.buttonBox = QtWidgets.QDialogButtonBox(SQLDialog)
+        self.buttonBox.setGeometry(QtCore.QRect(120, 130, 171, 32))
+        self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
+        self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel|QtWidgets.QDialogButtonBox.Ok)
+        self.buttonBox.setObjectName("buttonBox")
+        self.groupBox = QtWidgets.QGroupBox(SQLDialog)
+        self.groupBox.setGeometry(QtCore.QRect(10, 10, 181, 111))
+        self.groupBox.setObjectName("groupBox")
+        self.sqlDialog_host = QtWidgets.QLineEdit(self.groupBox)
+        self.sqlDialog_host.setGeometry(QtCore.QRect(50, 20, 121, 20))
+        self.sqlDialog_host.setObjectName("sqlDialog_host")
+        self.sqlDialog_user = QtWidgets.QLineEdit(self.groupBox)
+        self.sqlDialog_user.setGeometry(QtCore.QRect(50, 40, 121, 20))
+        self.sqlDialog_user.setObjectName("sqlDialog_user")
+        self.sqlDialog_password = QtWidgets.QLineEdit(self.groupBox)
+        self.sqlDialog_password.setGeometry(QtCore.QRect(50, 60, 121, 20))
+        self.sqlDialog_password.setObjectName("sqlDialog_password")
+        self.sqlDialog_DB = QtWidgets.QLineEdit(self.groupBox)
+        self.sqlDialog_DB.setGeometry(QtCore.QRect(50, 80, 121, 20))
+        self.sqlDialog_DB.setObjectName("sqlDialog_DB")
+        self.label = QtWidgets.QLabel(self.groupBox)
+        self.label.setGeometry(QtCore.QRect(0, 20, 47, 13))
+        self.label.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label.setObjectName("label")
+        self.label_2 = QtWidgets.QLabel(self.groupBox)
+        self.label_2.setGeometry(QtCore.QRect(0, 40, 47, 13))
+        self.label_2.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_2.setObjectName("label_2")
+        self.label_3 = QtWidgets.QLabel(self.groupBox)
+        self.label_3.setGeometry(QtCore.QRect(0, 60, 51, 20))
+        self.label_3.setObjectName("label_3")
+        self.label_4 = QtWidgets.QLabel(self.groupBox)
+        self.label_4.setGeometry(QtCore.QRect(0, 80, 51, 20))
+        self.label_4.setObjectName("label_4")
+        self.groupBox_2 = QtWidgets.QGroupBox(SQLDialog)
+        self.groupBox_2.setGeometry(QtCore.QRect(210, 10, 221, 111))
+        self.groupBox_2.setObjectName("groupBox_2")
+        self.create_SQLdb_pb = QtWidgets.QRadioButton(self.groupBox_2)
+        self.create_SQLdb_pb.setGeometry(QtCore.QRect(10, 20, 111, 17))
+        self.create_SQLdb_pb.setObjectName("create_SQLdb_pb")
+        self.delete_SQLdb_pb = QtWidgets.QRadioButton(self.groupBox_2)
+        self.delete_SQLdb_pb.setGeometry(QtCore.QRect(10, 50, 101, 17))
+        self.delete_SQLdb_pb.setObjectName("delete_SQLdb_pb")
+        self.no_action_SQLdb_pb = QtWidgets.QRadioButton(self.groupBox_2)
+        self.no_action_SQLdb_pb.setGeometry(QtCore.QRect(10, 80, 82, 17))
+        self.no_action_SQLdb_pb.setObjectName("no_action_SQLdb_pb")
+        self.sql_action_pb = QtWidgets.QPushButton(self.groupBox_2)
+        self.sql_action_pb.setGeometry(QtCore.QRect(120, 30, 75, 41))
+        self.sql_action_pb.setObjectName("sql_action_pb")
+
+        self.retranslateUi(SQLDialog)
+        self.buttonBox.accepted.connect(SQLDialog.accept)
+        self.buttonBox.rejected.connect(SQLDialog.reject)
+        QtCore.QMetaObject.connectSlotsByName(SQLDialog)
+
+    def retranslateUi(self, SQLDialog):
+        _translate = QtCore.QCoreApplication.translate
+        SQLDialog.setWindowTitle(_translate("SQLDialog", "Dialog"))
+        self.groupBox.setTitle(_translate("SQLDialog", "Database Settings"))
+        self.label.setText(_translate("SQLDialog", "host:"))
+        self.label_2.setText(_translate("SQLDialog", "user:"))
+        self.label_3.setText(_translate("SQLDialog", "password:"))
+        self.label_4.setText(_translate("SQLDialog", "database:"))
+        self.groupBox_2.setTitle(_translate("SQLDialog", "Database Action"))
+        self.create_SQLdb_pb.setText(_translate("SQLDialog", "Create Database"))
+        self.delete_SQLdb_pb.setText(_translate("SQLDialog", "Delete Database"))
+        self.no_action_SQLdb_pb.setText(_translate("SQLDialog", "No Action"))
+        self.sql_action_pb.setText(_translate("SQLDialog", "Take Action"))
+####################### END OF PYUIC5 Generated Python Code#############################################
 
 class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, parent=None):
@@ -153,22 +202,18 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
          4. run_parse_button - Pushbutton to trigger file parser.
          5. obj_id_prefix - Line edit that provides means to manually enter the object ID prefix (e.g., APPSW)
    
-        '''
-        self.no_action_SQLdb_pb.setChecked(True)
-        
+        '''        
         self.inputs = list()
         self.outputs = list()
         self.alignconsts = list() 
         self.designconsts = list() 
         self.faults = list()
-
         '''
         EmittingStream:
         Install a custom output stream by connecting sys.stdout to instance of EmmittingStream.
 
         '''
         sys.stdout = EmittingStream(textWritten=self.output_terminal_written)
-
         '''
         Connectors/Signals:
         1. Clicking of export_dir_pb will trigger the exportFileDirButtonClicked method.
@@ -180,8 +225,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.export_dir_pb.clicked.connect(self.exportFileDirButtonClicked)
         self.run_parse_button.clicked.connect(self.runParseButtonClicked)
         self.actionHelp.triggered.connect(self.help_Ui)
-        self.sqldb_action_pb.clicked.connect(self.sqlDatabaseTakeAction)
-
+        self.sqlDialog_Open_pb.clicked.connect(self.openSQLDialogClicked)
+     
     def exportFileDirButtonClicked(self):
         '''
          Method 'exportFileDirButtonClicked':
@@ -224,16 +269,36 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.output_terminal.setTextCursor(cursor)
         self.output_terminal.ensureCursorVisible()
 
+    def openSQLDialogClicked(self):
+        d = SQLDialog(self)
+        d.exec()
+
+    def help_Ui(self):
+        print(help(MainWindow.setupUi))
+        print(help(MainWindow.exportFileDirButtonClicked))
+        print(help(MainWindow.runParseButtonClicked))
+        print(help(MainWindow.output_terminal_written))
+        print(help(MainWindow.sqlDatabaseTakeAction))
+        print(help(parse.parse_export_file))
+
+class SQLDialog(QtWidgets.QDialog, Ui_SQLDialog):
+    def __init__(self, parent = None):
+        super(SQLDialog, self).__init__(parent)
+        self.setupUi(self)
+
+        self.no_action_SQLdb_pb.setChecked(True)
+        self.sql_action_pb.clicked.connect(self.sqlDatabaseTakeAction)
+
     def sqlDatabaseTakeAction(self):
         '''
          Method 'sqlDatabaseTakeAction':
-         Can either create or delete a MySQL database, provided the database's name is specified
-         in the GUI and the appropriate database action radio button is checked.  This method calls either
+         Can either create or delete a MySQL database, provided the database's settings are specified
+         and the appropriate database action radio button is checked.  This method calls either
          create_database or delete_database, depending on the action.  Create database must check if the lists
          that runParseButtonClicked updated are not empty.
         
         '''
-        if str(self.database_name.text()).strip() == '':
+        if str(self.sqlDialog_DB.text()).strip() == '':
                 print('The database name is blank.  Please edit.')
         elif self.create_SQLdb_pb.isChecked():
             mysql_lib.create_database(self.database_name.text())
@@ -243,15 +308,6 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.no_action_SQLdb_pb.setChecked(True) # Prevent inadvertent action taken after deletion.
         else: # do nothing.
             self.no_action_SQLdb_pb.setChecked(True)
-    
-    def help_Ui(self):
-        print(help(MainWindow.setupUi))
-        print(help(MainWindow.exportFileDirButtonClicked))
-        print(help(MainWindow.runParseButtonClicked))
-        print(help(MainWindow.output_terminal_written))
-        print(help(MainWindow.sqlDatabaseTakeAction))
-        print(help(parse.parse_export_file))
-
 
 if __name__ == "__main__":
     import sys
