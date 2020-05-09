@@ -8,7 +8,7 @@ data types for an application.
 2. ioparse.py - Custom module that is imported into parse.py.  It defines class Signal as well as methods defined that are used within ioparse and parse.py.
 3. mysql_lib.py - Library of mysql methods for use. 
 4. user_defined.py - User defined functionality that is imported into other modules.
-5. theUI.py - The user-interface file (GUI).
+5. frdparseUI.py - The user-interface file (GUI).
 6. exportedfile.txt - Source text file of requirements that parse.py parses through.
 
 # Outputs

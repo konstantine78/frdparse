@@ -1,45 +1,11 @@
-# -*- coding: utf-8 -*-
-
-# Form implementation generated from reading ui file 'frdparse.ui'
-#
-# Created by: PyQt5 UI code generator 5.13.2
-#
-# WARNING! All changes made in this file will be lost!
-
-
 from PyQt5 import QtCore, QtGui, QtWidgets
-from user_defined import *
 import sys
 import parse
 import mysql_lib
+from user_defined import *
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
-        '''
-        ----------------------------------
-         These list declarations are not part of the UI.  They are lists of raw data obtained
-         from the exported text file.
-         1. inputs
-         2. ouputs
-         3. alignconsts
-         4. designconsts
-        ----------------------------------        
-        '''
-        self.inputs = list()
-        self.outputs = list()
-        self.alignconsts = list() 
-        self.designconsts = list() 
-        self.faults = list()
-        '''
-        ----------------------------------
-         The following are widgets of the UI MainWindow:
-         1. export_dir_pb - Pushbutton that opens QFileDialog for setting working directory.
-         2. export_dir - Line edit that contains the working directory.
-         3. output_terminal - An output terminal that prints all sys.stdout statements.
-         4. run_parse_button - Pushbutton to trigger file parser.
-         5. obj_id_prefix - Line edit that provides means to manually enter the object ID prefix (e.g., APPSW)
-        ----------------------------------
-        '''
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(676, 600)
         MainWindow.setStatusTip("")
@@ -82,8 +48,6 @@ class Ui_MainWindow(object):
         self.label_2.setFont(font)
         self.label_2.setObjectName("label_2")
         self.run_parse_button = QtWidgets.QPushButton(self.centralwidget)
-        self.run_parse_button.setIcon(QtGui.QIcon("play.png"))
-        self.run_parse_button.setIconSize(QtCore.QSize(72,72))
         self.run_parse_button.setGeometry(QtCore.QRect(150, 90, 71, 61))
         self.run_parse_button.setText("")
         self.run_parse_button.setDefault(False)
@@ -114,7 +78,6 @@ class Ui_MainWindow(object):
         self.delete_SQLdb_pb = QtWidgets.QRadioButton(self.groupBox)
         self.delete_SQLdb_pb.setGeometry(QtCore.QRect(10, 40, 111, 17))
         self.delete_SQLdb_pb.setObjectName("delete_SQLdb_pb")
-        self.no_action_SQLdb_pb.setChecked(True)
         self.label_4 = QtWidgets.QLabel(self.centralwidget)
         self.label_4.setGeometry(QtCore.QRect(510, 90, 131, 21))
         font = QtGui.QFont()
@@ -143,24 +106,6 @@ class Ui_MainWindow(object):
         self.menuFile.addAction(self.actionHelp)
         self.menubar.addAction(self.menuFile.menuAction())
 
-        # Install a custom output stream by connecting sys.stdout to instance of EmmittingStream.
-        sys.stdout = EmittingStream(textWritten=self.output_terminal_written)
-        
-        # Create signal/connections for custom methods.
-        '''
-        ----------------------------------
-        Connectors in the UI file:
-        1. Clicking of export_dir_pb will trigger the exportFileDirButtonClicked method.
-        2. Clicking of run_parse_button will trigger the runParseButtonClicked method.
-        3. Triggering the Help action from menu will trigger the help_Ui method.
-        4. Clicking the sqldb_action_pb will trigger the sqlDatabaseTakeAction method.
-        ----------------------------------
-        '''
-        self.export_dir_pb.clicked.connect(self.exportFileDirButtonClicked)
-        self.run_parse_button.clicked.connect(self.runParseButtonClicked)
-        self.actionHelp.triggered.connect(self.help_Ui)
-        self.sqldb_action_pb.clicked.connect(self.sqlDatabaseTakeAction)
-
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
@@ -188,14 +133,61 @@ class Ui_MainWindow(object):
         self.actionHelp.setStatusTip(_translate("MainWindow", "Run this for help on tool\'s functions."))
         self.actionHelp.setShortcut(_translate("MainWindow", "Ctrl+Shift+H"))
 
-    # Custom UI Methods
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
+    def __init__(self, parent=None):
+        super(MainWindow, self).__init__(parent)
+        self.setupUi(self)
+        '''
+         These list declarations are not part of the UI.  They are lists of raw data obtained
+         from the exported text file.
+         1. inputs
+         2. ouputs
+         3. alignconsts
+         4. designconsts
+         5. faults
+         
+         The following are widgets of the UI MainWindow:
+         1. export_dir_pb - Pushbutton that opens QFileDialog for setting working directory.
+         2. export_dir - Line edit that contains the working directory.
+         3. output_terminal - An output terminal that prints all sys.stdout statements.
+         4. run_parse_button - Pushbutton to trigger file parser.
+         5. obj_id_prefix - Line edit that provides means to manually enter the object ID prefix (e.g., APPSW)
+   
+        '''
+        self.no_action_SQLdb_pb.setChecked(True)
+        
+        self.inputs = list()
+        self.outputs = list()
+        self.alignconsts = list() 
+        self.designconsts = list() 
+        self.faults = list()
+
+        '''
+        EmittingStream:
+        Install a custom output stream by connecting sys.stdout to instance of EmmittingStream.
+
+        '''
+        sys.stdout = EmittingStream(textWritten=self.output_terminal_written)
+
+        '''
+        Connectors/Signals:
+        1. Clicking of export_dir_pb will trigger the exportFileDirButtonClicked method.
+        2. Clicking of run_parse_button will trigger the runParseButtonClicked method.
+        3. Triggering the Help action from menu will trigger the help_Ui method.
+        4. Clicking the sqldb_action_pb will trigger the sqlDatabaseTakeAction method.
+
+        '''
+        self.export_dir_pb.clicked.connect(self.exportFileDirButtonClicked)
+        self.run_parse_button.clicked.connect(self.runParseButtonClicked)
+        self.actionHelp.triggered.connect(self.help_Ui)
+        self.sqldb_action_pb.clicked.connect(self.sqlDatabaseTakeAction)
+
     def exportFileDirButtonClicked(self):
         '''
-        ----------------------------------
          Method 'exportFileDirButtonClicked':
          Creates a QFileDialog for setting the working directory.  The string for that directory is then
          stored in export_dir.
-        ----------------------------------
+        
         '''
         directory = str(QtWidgets.QFileDialog.getExistingDirectory())
         self.export_dir.setText('{}'.format(directory))
@@ -203,12 +195,11 @@ class Ui_MainWindow(object):
 
     def runParseButtonClicked(self):
         '''
-        ----------------------------------
          Method 'runParseButtonClicked':
          Parses through the export text file.  The method will need to know the file's directory path
          and the object ID prefix within the document.  At the core of this method is the call to parse_export_file.  That
          method will return the various lists needed downstream to create tables in the mysql database.
-        ----------------------------------
+        
         '''
         if str(self.export_dir.text()).strip() == '' or str(self.obj_id_prefix.text()).strip() == '':
             print('Your directory path and/or Object ID prefix are empty.')
@@ -222,11 +213,10 @@ class Ui_MainWindow(object):
 
     def output_terminal_written(self, text):
         '''
-        ----------------------------------
          Method 'output_terminal_written':
          Output ANY console output (stdout) to the output terminal text edit widget.
          This method is connected to sys.stdout via custom class EmittingStream.
-        ----------------------------------
+
         '''
         cursor = self.output_terminal.textCursor()
         cursor.movePosition(QtGui.QTextCursor.End)
@@ -236,13 +226,12 @@ class Ui_MainWindow(object):
 
     def sqlDatabaseTakeAction(self):
         '''
-        ----------------------------------
          Method 'sqlDatabaseTakeAction':
          Can either create or delete a MySQL database, provided the database's name is specified
          in the GUI and the appropriate database action radio button is checked.  This method calls either
          create_database or delete_database, depending on the action.  Create database must check if the lists
          that runParseButtonClicked updated are not empty.
-        ----------------------------------
+        
         '''
         if str(self.database_name.text()).strip() == '':
                 print('The database name is blank.  Please edit.')
@@ -256,18 +245,17 @@ class Ui_MainWindow(object):
             self.no_action_SQLdb_pb.setChecked(True)
     
     def help_Ui(self):
-        print(help(Ui_MainWindow.setupUi))
-        print(help(Ui_MainWindow.exportFileDirButtonClicked))
-        print(help(Ui_MainWindow.runParseButtonClicked))
-        print(help(Ui_MainWindow.output_terminal_written))
-        print(help(Ui_MainWindow.sqlDatabaseTakeAction))
+        print(help(MainWindow.setupUi))
+        print(help(MainWindow.exportFileDirButtonClicked))
+        print(help(MainWindow.runParseButtonClicked))
+        print(help(MainWindow.output_terminal_written))
+        print(help(MainWindow.sqlDatabaseTakeAction))
         print(help(parse.parse_export_file))
+
 
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
-    MainWindow = QtWidgets.QMainWindow()
-    ui = Ui_MainWindow()
-    ui.setupUi(MainWindow)
-    MainWindow.show()
+    w = MainWindow()
+    w.show()
     sys.exit(app.exec_())
