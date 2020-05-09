@@ -10,8 +10,10 @@ data types for an application.
 4. user_defined.py - User defined functionality that is imported into other modules.
 5. frdparseUI.py - The user-interface file (GUI).
 6. exportedfile.txt - Source text file of requirements that parse.py parses through.
+7. frdparse.ui - Qt Designer created user interface file that is run through pyuic5 to generate the Ui_MainWindow class, which is parent class to MainWindow.
+8. sqlDialog.ui - Qt Designer created user interface file that is run through pyuic5 to generate the Ui_SQLDialog class, which is parent class to SQLDialog.
 
 # Outputs
 1. Data.csv - Tab-delimited csv archive of all data, along with attributes/fields for each, organized in table format.
 2. Faults.csv - Tab-delimited csv archive of all fault data.
-3. 'database' - any mysql database.  The user interface supports setting the name via manual entry to a QLineEdit widget.
+3. 'database' - any mysql database.  The user interface supports updating the database settings, including the name of it.
