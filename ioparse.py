@@ -1,110 +1,24 @@
 import re
-import csv
-import os
-
+import userdefined
 DataTypesDict = {'F':'float','B':'bool','I':'int', 'OM':'OperatingMode', 'UI':'unsigned int'}
-DataSyntaxDict = {'I':'Input', 'O':'Output', 'AC':'AlignConst', 'DC':'DesignConst', 'LV':'LocalVar', 'F':'Fault'}
-
-def syntaxKey(line):
-    if line.startswith('I:'):
-        return DataSyntaxDict.get('I')
-    if line.startswith('O:'):
-        return DataSyntaxDict.get('O')
-    if line.startswith('AC:'):
-        return DataSyntaxDict.get('AC')
-    if line.startswith('DC:'):
-        return DataSyntaxDict.get('DC')
-    if line.startswith('LV:'):
-        return DataSyntaxDict.get('LV')
-    if line.startswith('F:'):
-        return DataSyntaxDict.get('F')
-
-def isConstant(mystring):
-    pattern = re.compile(r'AC:{1}|DC:{1}').search(mystring)
-    if pattern:
-        return True
-    else:
-        return False
-
-def isConditional(mystring):
-    pattern = re.compile(r'C:').search(mystring)
-    if pattern:
-        return True
-    else: 
-        return False
-
-def is_float(value):
-  try:
-    float(value)
-    return True
-  except:
-    return False
-    
-def is_int(value):
-  try:
-    int(value)
-    return True
-  except:
-    return False
- 
-def write_data_to_csv_output(theList, csvwriter):
-    for i in range (len(theList)):
-        csvwriter.writerow(
-            [
-                theList[i].name,
-                theList[i].datatype,
-                theList[i].datatype_abbreviated,
-                theList[i].objectID,
-                theList[i].source,
-                theList[i].destination,
-                theList[i].units,
-                theList[i].defaultvalue,
-                theList[i].minvalue,
-                theList[i].maxvalue,
-                ]
-            )
-
-def write_faults_to_csv_output(theList, csvwriter):
-    for i in range (len(theList)):
-        csvwriter.writerow(
-            [
-                theList[i].objectID,
-                theList[i].faultname,
-                theList[i].faultcode,
-                theList[i].faultdescr,
-                theList[i].faultcumlimit,
-                theList[i].faultconlimit,
-                ]
-            )
-
-def csv_file_cleanup(path, infile, outfile, delete=False):
-    with open(path + infile, 'r') as input:
-        with open(path + outfile, 'w') as output:
-            non_blank_lines = (line for line in input if line.strip())
-            output.writelines(non_blank_lines)
-    if delete == True:
-        delete_file(path, infile)    
-
-def delete_file(path, file):
-    os.chdir(path)
-    os.remove(file)
-    print(path+file+' has been deleted.')
+DataSyntaxDict = {'I':'Input', 'Inter':'Intermediate', 'O':'Output', 'AC':'AlignConst', 'DC':'DesignConst', 'LV':'LocalVar', 'F':'Fault'}
+ConstantTypeDict = {'DC':0, 'AC':1}
+ID_PREFIX = ''
 
 class Data:
-    def __init__(self, name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue):
+    def __init__(self, sectionID, objectID, name, vi_name, datatype, datatype_abbreviated):
+        self.sectionID = sectionID
+        self.objectID = objectID
         self.name = name
+        self.vi_name = vi_name
         self.datatype = datatype
         self.datatype_abbreviated = datatype_abbreviated
-        self.objectID = objectID
-        self.source = source
-        self.destination = destination
-        self.units = units
-        self.defaultvalue = defaultvalue
-        self.minvalue = minvalue
-        self.maxvalue = maxvalue
     
     def getName(self):
         return '{}'.format(self.name)
+
+    def getVIName(self):
+        return '{}'.format(self.vi_name)
 
     def getDataType(self, abbreviated=False):
         if abbreviated == True:
@@ -112,23 +26,17 @@ class Data:
         else:
             return '{}'.format(self.datatype)
 
+    def getSectionID(self):
+        return '{}'.format(self.sectionID)
+
     def getObjectID(self):
         return '{}'.format(self.objectID)
 
-    def getSource(self):
-        return '{}'.format(self.source)
-
-    def getDefaultValue(self, numeric=False):
-        if numeric == True:
-            if is_float(self.defaultvalue):
-                return float(self.defaultvalue)
-            elif is_int(self.defaultvalue):
-                return int(self.defaultvalue)
-        else:
-            return '{}'.format(self.defaultvalue)
+    def getDataTypeAbbreviated(self):
+        return '{}'.format(self.datatype_abbreviated)
 
     @classmethod
-    def ConvertStringToData(cls, fullstring, keyword, ID):
+    def ConvertStringToData(cls, fullstring, majorID, minorID):
         ''' 
         ---------------------------------------------------------------------------------------------------------
         ConvertStringToData:
@@ -136,20 +44,71 @@ class Data:
         variables populated with real data after having parsed through the string argument to this method.
         It has four arguments, one of which is the class Data itself, since it is a classmethod.  The other three
         arguments are as follows: 
-        1. fullstring - this is the line feed from the exported text input file.
-        2. keyword - this is the first part of the full string that provides the data syntax for defining what
-        type of data it is.
-        3. ID - This is the object identifier for the line.
+        1. 
 
         This class method performs the following:
-        1. The object ID will be equal to the ID argument to this method.
-        2. The full string is updated to remove all spaces.
-        3. Regular expression patterns are defined to determine the name, data type, and source (for inputs).  
-        4. String searches with the regular expression patterns are performed to determine member values.
-        4. The keyword is used to determine various class members' values.
+        1. The section ID will be equal the majorID argument.
+        2. The object ID will be equal to the minorID argument to this method.
+        3. The full string is updated to remove all spaces.
+        4. Regular expression patterns are defined to determine the name, data type, and source (for inputs).  
+        5. String searches with the regular expression patterns are performed to determine member values.
         ---------------------------------------------------------------------------------------------------------
         '''
-        objectID = ID
+        sectionID = majorID
+        objectID = minorID
+
+        # Delete spaces.
+        fullstring = fullstring.replace(" ", "")
+
+        # Define the regular expressions to use for pattern recognition.
+        name_pattern = re.compile(r':(.*)\(.\)')
+        datatype_abbreviated_pattern = re.compile(r'\(([A-Z]*)\)')
+        #source_pattern = re.compile(r'\(Source:(.*)\)' )
+
+        # Name
+        matched_string = name_pattern.search(fullstring)
+        if matched_string: 
+            name = matched_string[1]
+        else:
+            name = 'FAILED'
+        
+        vi_name = sectionID + '_' + name
+
+        # Data type and abbreviation
+        matched_string = datatype_abbreviated_pattern.search(fullstring)
+        if matched_string: 
+            datatype_abbreviated = matched_string[1]
+            datatype = DataTypesDict[datatype_abbreviated]
+        else:
+            datatype_abbreviated = 'Could not determine abbreviated data type.'
+            datatype = 'Could not determine data type.'
+          
+        return cls(sectionID, objectID, name, vi_name, datatype, datatype_abbreviated)
+        
+class Input(Data):
+    def __init__(self, sectionID, objectID, name, vi_name, datatype, datatype_abbreviated, source, intermediate):
+        super().__init__(sectionID, objectID, name, vi_name, datatype, datatype_abbreviated)
+        self.source = source
+        self.intermediate = intermediate
+    
+    def getSource(self):
+        return '{}'.format(self.source)
+
+    def isIntermediate(self):
+        if self.intermediate == True:
+            return True
+        return False
+
+    @classmethod
+    def ConvertStringToData(cls, fullstring, majorID, minorID):
+        ''' 
+        ---------------------------------------------------------------------------------------------------------
+        ConvertStringToData:
+        TBD
+        ---------------------------------------------------------------------------------------------------------
+        '''
+        sectionID = majorID
+        objectID = minorID
 
         # Delete spaces.
         fullstring = fullstring.replace(" ", "")
@@ -165,6 +124,64 @@ class Data:
             name = matched_string[1]
         else:
             name = 'Could not determine Name of data.'
+        
+        vi_name = sectionID + '_' + name
+        
+        # Data type and abbreviation
+        matched_string = datatype_abbreviated_pattern.search(fullstring)
+        if matched_string: 
+            datatype_abbreviated = matched_string[1]
+            datatype = DataTypesDict[datatype_abbreviated]
+        else:
+            datatype_abbreviated = 'Could not determine abbreviated data type.'
+            datatype = 'Could not determine data type.'
+        
+        # Determine input signal 'Source'.
+        matched_string = source_pattern.search(fullstring)
+        source = matched_string[1] 
+        if ID_PREFIX in source:
+            intermediate = True
+        else:
+            intermediate = False
+
+        return cls(sectionID, objectID, name, vi_name, datatype, datatype_abbreviated, source, intermediate)
+        
+class Output(Data):
+    def __init__(self, sectionID, objectID, name, vi_name, datatype, datatype_abbreviated, destination):
+        super().__init__(sectionID, objectID, name, vi_name, datatype, datatype_abbreviated)
+        self.destination = destination
+
+    def getDestination(self):
+        return '{}'.format(self.destination)
+
+    
+    @classmethod
+    def ConvertStringToData(cls, fullstring, majorID, minorID):
+        ''' 
+        ---------------------------------------------------------------------------------------------------------
+        ConvertStringToData:
+        TBD
+        ---------------------------------------------------------------------------------------------------------
+        '''
+        sectionID = majorID
+        objectID = minorID
+
+        # Delete spaces.
+        fullstring = fullstring.replace(" ", "")
+
+        # Define the regular expressions to use for pattern recognition.
+        name_pattern = re.compile(r':(.*)\(.\)')
+        datatype_abbreviated_pattern = re.compile(r'\(([A-Z]*)\)')
+        destination_pattern = re.compile(r'\(Destination:(.*)\)' )
+
+        # Name
+        matched_string = name_pattern.search(fullstring)
+        if matched_string: 
+            name = matched_string[1]
+        else:
+            name = 'Could not determine Name of data.'
+
+        vi_name = sectionID + '_' + name
 
         # Data type and abbreviation
         matched_string = datatype_abbreviated_pattern.search(fullstring)
@@ -175,60 +192,117 @@ class Data:
             datatype_abbreviated = 'Could not determine abbreviated data type.'
             datatype = 'Could not determine data type.'
         
-        # Determine input signal 'Source'.  All others are N/A.
-        matched_string = source_pattern.search(fullstring)
-        if keyword == 'Input' and matched_string:
-            source = matched_string[1]
-        else: 
-            source = 'N/A'
-
-        # Determine Destination.  This only applies to Output and Local Variable Data.
-        if keyword == 'Output' or keyword == 'LocalVar':
-            destination = 'tbd'
+        # Determine 'Destination'.
+        if 'Destination:' in fullstring:
+            matched_string = destination_pattern.search(fullstring)
+            destination = matched_string[1]
         else:
-            destination = 'N/A'
-        
-        # Determine Units.  Everyone has units but Local Variables.
-        if keyword != 'LocalVar':
-            units = 'tbd'
-        else: 
-            units = 'N/A'
+            destination = 'NA'
 
-        # Determine the default value.
-        defaultvalue = 'N/A'
+        return cls(sectionID, objectID, name, vi_name, datatype, datatype_abbreviated, destination) 
 
-        # Determine the minimum and maximum values.  This applies to alignment constants only.
-        if keyword == 'AlignConst':
-            minvalue = 'tbd'
-            maxvalue = 'tbd'
+class Constant(Data):
+    def __init__(self, sectionID, objectID, name, vi_name, datatype, datatype_abbreviated, const_type, units, defaultvalue, minvalue, maxvalue):
+        super().__init__(sectionID, objectID, name, vi_name, datatype, datatype_abbreviated)
+        self.const_type = const_type
+        self.units = units
+        self.defaultvalue = defaultvalue
+        self.minvalue = minvalue
+        self.maxvalue = maxvalue
+
+    def getDefaultValue(self, numeric=False):
+        if numeric == True:
+            if userdefined.is_int(self.defaultvalue):
+                return int(self.defaultvalue)            
+            elif userdefined.is_float(self.defaultvalue):
+                return float(self.defaultvalue)
         else:
-            minvalue = 'N/A'
-            maxvalue = 'N/A'
-
-        return cls(name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue)
-        
-class Input(Data):
-    def __init__(self, name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue):
-        super().__init__(name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue)
+            return '{}'.format(self.defaultvalue)    
     
-class Output(Data):
-    def __init__(self, name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue):
-        super().__init__(name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue)
+    def getUnits(self):
+        return '{}'.format(self.units)    
+    
+    def getConstType(self):
+        return '{}'.format(self.const_type)    
+    
+    def getMinValue(self, numeric=False):        
+        if numeric == True:
+            if userdefined.is_int(self.minvalue):
+                return int(self.minvalue)
+            elif userdefined.is_float(self.minvalue):
+                return float(self.minvalue)
+        else:
+            return '{}'.format(self.minvalue)     
+    
+    def getMaxValue(self, numeric=False):        
+        if numeric == True:
+            if userdefined.is_int(self.maxvalue):
+                return int(self.maxvalue)
+            elif userdefined.is_float(self.maxvalue):
+                return float(self.maxvalue)
+        else:
+            return '{}'.format(self.maxvalue)     
+    
+    @classmethod
+    def ConvertStringToData(cls, fullstring, majorID, minorID):
+        ''' 
+        ---------------------------------------------------------------------------------------------------------
+        ConvertStringToData:
+        ---------------------------------------------------------------------------------------------------------
+        '''
+        sectionID = majorID
+        objectID = minorID
 
-class AlignConst(Data):
-    def __init__(self, name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue):
-        super().__init__(name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue)
-        
-class DesignConst(Data):
-    def __init__(self, name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue):
-        super().__init__(name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue)
-        
+        # Delete spaces.
+        fullstring = fullstring.replace(" ", "")
+
+        # Define the regular expressions to use for pattern recognition.
+        name_pattern = re.compile(r':(.*)\(.\)')
+        datatype_abbreviated_pattern = re.compile(r'\(([A-Z]*)\)')
+
+        # Name
+        matched_string = name_pattern.search(fullstring)
+        if matched_string: 
+            name = matched_string[1]
+        else:
+            name = 'Could not determine Name of data.'
+
+        vi_name = sectionID + '_' + name
+
+        # Data type and abbreviation
+        matched_string = datatype_abbreviated_pattern.search(fullstring)
+        if matched_string: 
+            datatype_abbreviated = matched_string[1]
+            datatype = DataTypesDict[datatype_abbreviated]
+        else:
+            datatype_abbreviated = 'Could not determine abbreviated data type.'
+            datatype = 'Could not determine data type.'
+
+        # Determine the type of constant (Align or Design)
+        if fullstring.startswith('AC'):
+            const_type = ConstantTypeDict.get('AC')
+        else:
+            const_type = ConstantTypeDict.get('DC')
+
+        # Determine the units for this constant.
+        units = 'tbd'
+
+        # Determine the default value for this constant.
+        defaultvalue = 'tbd'
+
+        # Determine the minimum and maximum values for this constant.
+        minvalue = 'tbd'
+        maxvalue = 'tbd'
+          
+        return cls(sectionID, objectID, name, vi_name, datatype, datatype_abbreviated, const_type, units, defaultvalue, minvalue, maxvalue)
+
 class LocalVariable(Data):
-    def __init__(self, name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue):
-        super().__init__(name, datatype, datatype_abbreviated, objectID, source, destination, units, defaultvalue, minvalue, maxvalue)
+    def __init__(self, sectionID, objectID, name, vi_name, datatype, datatype_abbreviated):
+        super().__init__(sectionID, objectID, name, vi_name, datatype, datatype_abbreviated)
 
 class Fault:
-    def __init__(self, objectID, faultname, faultcode, faultdescr, faultcumlimit, faultconlimit):
+    def __init__(self, sectionID, objectID, faultname, faultcode, faultdescr, faultcumlimit, faultconlimit):
+        self.sectionID = sectionID
         self.objectID = objectID
         self.faultname = faultname
         self.faultcode = faultcode
@@ -237,10 +311,11 @@ class Fault:
         self.faultconlimit = faultconlimit
     
     @classmethod
-    def ConvertStringToFault(cls, fullstring, ID):
+    def ConvertStringToFault(cls, fullstring, majorID, minorID):
         
         # Define the Object ID
-        objectID = ID
+        sectionID = majorID
+        objectID = minorID
 
         # Define the regular expressions to use for pattern recognition.
         faultname_pattern = re.compile(r':(.*)\(')
@@ -271,4 +346,4 @@ class Fault:
         # Consecutive Limit
         faultconlimit = string_no_spaces.split('\"')[2].split(',')[2].split(')')[0].strip()
 
-        return cls(objectID, faultname, faultcode, faultdescr, faultcumlimit, faultconlimit)
+        return cls(sectionID, objectID, faultname, faultcode, faultdescr, faultcumlimit, faultconlimit)

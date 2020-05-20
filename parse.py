@@ -1,11 +1,10 @@
 import re
 import csv
-import os
+import userdefined
 import ioparse
 from ioparse import Input as i_data
 from ioparse import Output as o_data
-from ioparse import AlignConst as ac_data
-from ioparse import DesignConst as dc_data
+from ioparse import Constant as c_data
 from ioparse import Fault as fault_data
 
 def parse_export_file(path, id_prefix):
@@ -19,7 +18,7 @@ def parse_export_file(path, id_prefix):
     4. Loop through the text file using the object identifier as a point of reference.  The assumption is that the object id
     is at the beginning of the "section of text" in question, whether it be Data definition or conditional statements.  We want
     to loop through, identify those objects that represent Data and then further loop through statements to create
-    our lists of Data (or Fault) class instances.  
+    our lists of Data (or sub-classes to Data) and Fault class instances.  
     5. Parsing is performed mostly via regular expression matched strings and general string manipulation.  At the heart of 
     the parsing are the classmethods that are called from module ioparse.  These methods are custom classmethods
     and will return the class, Data (or Fault), from ioparse and allow for instantiation local to parse.py.  
@@ -28,8 +27,7 @@ def parse_export_file(path, id_prefix):
     ----------------------------------------------------------------------------------------------------------------------------
     '''
     path = path+'/'
-    #path = 'C:/Users/kostas/Documents/GitHub/frdparse/exporttextfiles/'
-    #id_prefix = 'APPSW'
+    ioparse.ID_PREFIX = id_prefix
     with open(path + 'exportedfile.txt', 'r') as infile:
         with open(path + 'output.txt', 'w') as outfile:
             for line in infile:
@@ -39,10 +37,11 @@ def parse_export_file(path, id_prefix):
     with open(path + 'output.txt', 'r') as f:
         file_contents = f.readlines()
 
-    input_signals = list()
-    output_signals = list()
-    align_constants = list()
-    design_constants = list()
+    objectID = ''
+    sectionID = ''
+    inputs = list()
+    outputs = list()
+    constants = list()
     local_variables = list()
     faults = list()
 
@@ -54,51 +53,35 @@ def parse_export_file(path, id_prefix):
         if line.startswith('#ENDOFFILE'):
             pass
         
-        # Record the Object ID to theID, as it is used in all instances of class Signal below.  Everything has an Object ID.
-        if line.startswith('Obect Identifier: ' + id_prefix):
-            theID = re.compile(r'\w+[0-9]').search(line)[0]
+        # Record the Object ID , as it is used in all instances of class below.  Everything has an Object ID.
+        if line.startswith('Object Identifier: ' + id_prefix):
+            objectID = re.compile(r'\w+[0-9]').search(line)[0]
+
+        if line.startswith('Type:') and ('Section' in line):
+            sectionID = objectID
 
         # Check beginning of each line for Data-specific syntax.
         if line.startswith('I:'):
-            input_signals.append(i_data.ConvertStringToData(line, ioparse.DataSyntaxDict.get('I'), theID))
+            inputs.append(i_data.ConvertStringToData(line, sectionID, objectID))
         if line.startswith('O:'):
-            output_signals.append(o_data.ConvertStringToData(line, ioparse.DataSyntaxDict.get('O'), theID))
-        if line.startswith('AC:'):
-            align_constants.append(ac_data.ConvertStringToData(line, ioparse.DataSyntaxDict.get('AC'), theID))
-        if line.startswith('DC:'):
-            design_constants.append(dc_data.ConvertStringToData(line, ioparse.DataSyntaxDict.get('DC'), theID))
+            outputs.append(o_data.ConvertStringToData(line, sectionID, objectID))
+        if line.startswith('AC:') or line.startswith('DC'):
+            constants.append(c_data.ConvertStringToData(line, sectionID, objectID))
         if line.startswith('LV:'):
             local_variables.append('PLACEHOLDER')
             pass# This is a PLACEHOLDER
         if line.startswith('F:'):
-            faults.append(fault_data.ConvertStringToFault(line, theID))
+            faults.append(fault_data.ConvertStringToFault(line, sectionID, objectID))
             pass# This is a PLACEHOLDER
         else:
             pass# This is a PLACEHOLDER
 
-    # Write Data items to a temporary *.csv file.
-    with open(path + 'temp1.csv', 'w') as csv_file:
-        csv_writer = csv.writer(csv_file, delimiter='\t')
-        csv_writer.writerow(
-            ['Name', 'Data Type', 'Data Type Abbrev.', 'Object ID', 
-            'Source', 'Destination', 'Units', 'Default Value', 'Minimum Value', 'Maximum Value']
-            )
-        ioparse.write_data_to_csv_output(input_signals, csv_writer)
-        ioparse.write_data_to_csv_output(output_signals, csv_writer)    
-        ioparse.write_data_to_csv_output(align_constants, csv_writer)    
-        ioparse.write_data_to_csv_output(design_constants, csv_writer)
-
-    with open(path + 'temp2.csv', 'w') as csv_file:
-        csv_writer = csv.writer(csv_file, delimiter='\t')
-        csv_writer.writerow(
-            ['Object ID', 'Fault Name', 'Fault Code', 'Fault Description', 'Cumulative Limit', 'Consecutive Limit']
-        )
-        ioparse.write_faults_to_csv_output(faults, csv_writer)
-                        
-    #Clean up.
-    ioparse.csv_file_cleanup(path, 'temp1.csv', 'Data.csv', True)
-    ioparse.csv_file_cleanup(path, 'temp2.csv', 'Faults.csv', True)
-    ioparse.delete_file(path, 'output.txt')
+    # Write all data to csv files and perform cleanup.
+    userdefined.update_output_data_files(path, inputs, outputs, constants, faults)
 
     # Return the lists for use downstream in creation of mysql database.
-    return input_signals, output_signals, align_constants, design_constants, faults
+    return inputs, outputs, constants, faults
+
+# This is used to run the file on its own without GUI.
+#path = 'C:/Users/kostas/Documents/GitHub/frdparse/exporttextfiles/'
+#parse_export_file(path, 'APPSW')
