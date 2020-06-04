@@ -1,10 +1,10 @@
 import csv
 import os
 
-inputsheader = ['Section ID', 'Object ID', 'Name', 'VI Name', 'Data Type', 'Data Type Abbrev.', 'Source']
+inputsheader = ['Section ID', 'Object ID', 'Name', 'VI Name', 'Data Type', 'Data Type Abbrev.', 'Source', 'Intermediate']
 outputsheader = ['SectionID', 'Object ID', 'Name', 'VI Name', 'Data Type', 'Data Type Abbrev.', 'Destination']
 constantsheader = ['SectionID', 'Object ID', 'Name', 'VI Name', 'Data Type', 'Data Type Abbrev.', 'Type', 'Units', 'Default Value', 'Min', 'Max']
-faultsheader = ['SectionID', 'Object ID', 'Faultname', 'Faultcode', 'Description', 'Cumulative Limit', 'Consecutive Limit']
+faultsheader = ['SectionID', 'Object ID', 'Faultname', 'VI Name', 'Faultcode', 'Description', 'Cumulative Limit', 'Consecutive Limit']
 
 def update_output_data_files(path, inputs, outputs, constants, faults):
     with open(path + 'temp1.csv', 'w') as csv_file:
@@ -85,6 +85,7 @@ def write_faults_to_csv(theList, csvwriter):
                 theList[i].sectionID,
                 theList[i].objectID,
                 theList[i].faultname,
+                theList[i].vi_name,
                 theList[i].faultcode,
                 theList[i].faultdescr,
                 theList[i].faultcumlimit,

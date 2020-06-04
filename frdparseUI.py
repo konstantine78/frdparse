@@ -16,18 +16,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
          These list declarations are not part of the UI.  They are lists of raw data obtained
          from the exported text file.
          1. inputs
-         2. ouputs
-         3. alignconsts
-         4. designconsts
-         5. faults
-         
-         The following are widgets of the UI MainWindow:
-         1. export_dir_pb - Pushbutton that opens QFileDialog for setting working directory.
-         2. export_dir - Line edit that contains the working directory.
-         3. output_terminal - An output terminal that prints all sys.stdout statements.
-         4. run_parse_button - Pushbutton to trigger file parser.
-         5. obj_id_prefix - Line edit that provides means to manually enter the object ID prefix (e.g., APPSW)
-   
+         2. outputs
+         3. consts
+         4. faults
+
         '''        
         self.inputs = list()
         self.outputs = list()
@@ -44,7 +36,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         1. Clicking of export_dir_pb will trigger the exportFileDirButtonClicked method.
         2. Clicking of run_parse_button will trigger the runParseButtonClicked method.
         3. Triggering the Help action from menu will trigger the help_Ui method.
-        4. Clicking the sqldb_action_pb will trigger the sqlDatabaseTakeAction method.
+        4. Clicking the sqlDialog_Open_pb will call the openSQLDialogClicked method which creates a SQL dialog.
 
         '''
         self.export_dir_pb.clicked.connect(self.exportFileDirButtonClicked)
@@ -68,7 +60,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
          Method 'runParseButtonClicked':
          Parses through the export text file.  The method will need to know the file's directory path
          and the object ID prefix within the document.  At the core of this method is the call to parse_export_file.  That
-         method will return the various lists needed downstream to create tables in the mysql database.
+         method will return the various lists needed downstream to create/populate tables in the mysql database.
         
         '''
         if str(self.export_dir.text()).strip() == '' or str(self.obj_id_prefix.text()).strip() == '':
@@ -77,7 +69,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             try:
                 print('Function parse_export_file form parse.py is being run.')
                 print('Executing parsing on text file in ' + self.export_dir.text() + '\nObject ID Prefix is: ' + self.obj_id_prefix.text())
-                self.inputs, self.ouputs, self.consts, self.faults = parse.parse_export_file(self.export_dir.text(), self.obj_id_prefix.text())
+                self.inputs, self.outputs, self.consts, self.faults = parse.parse_export_file(self.export_dir.text(), self.obj_id_prefix.text())
             except ValueError:
                 print('Check the export directory path and object ID prefix for an invalid/empty string.')
 
@@ -99,8 +91,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         o = self.outputs
         c = self.consts
         f = self.faults
-        d = SQLDialog(i,o,c,f)
-        d.exec_()
+        dlg = SQLDialog(i,o,c,f)
+        dlg.exec_()
 
     def help_Ui(self):
         print(help(MainWindow.setupUi))
@@ -127,12 +119,8 @@ class SQLDialog(QtWidgets.QDialog, Ui_SQLDialog):
 
     def sqlDatabaseTakeAction(self):
         '''
-         Method 'sqlDatabaseTakeAction':
-         Can either create or delete a MySQL database, provided the database's settings are specified
-         and the appropriate database action radio button is checked.  This method calls either
-         create_database or delete_database, depending on the action.  Create database must check if the lists
-         that runParseButtonClicked updated are not empty.
-        
+        Method 'sqlDatabaseTakeAction':
+        This method calls functions from mysql_lib that create the mysql database for use downstream.
         '''
         if str(self.sqlDialog_DB.text()).strip() == '':
                 print('The database name is blank.  Please edit.')
@@ -144,7 +132,10 @@ class SQLDialog(QtWidgets.QDialog, Ui_SQLDialog):
                 self.sqlDialog_DB.text()
                 )
             mysql_lib.create_tables(self.sqlDialog_DB.text())
-#            mysql_lib.update_input_table(self.sqlDialog_DB.text(), self.inputs)
+            mysql_lib.update_inputs_table(self.sqlDialog_DB.text(), self.inputs)
+            mysql_lib.update_outputs_table(self.sqlDialog_DB.text(), self.outputs)
+            mysql_lib.update_constants_table(self.sqlDialog_DB.text(), self.constants)
+            mysql_lib.update_faults_table(self.sqlDialog_DB.text(), self.faults)
             self.no_action_SQLdb_pb.setChecked(True) # Prevent inadvertent action taken after creation.
         elif self.delete_SQLdb_pb.isChecked():
             mysql_lib.delete_database(self.sqlDialog_DB.text())

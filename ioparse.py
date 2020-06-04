@@ -2,7 +2,6 @@ import re
 import userdefined
 DataTypesDict = {'F':'float','B':'bool','I':'int', 'OM':'OperatingMode', 'UI':'unsigned int'}
 DataSyntaxDict = {'I':'Input', 'Inter':'Intermediate', 'O':'Output', 'AC':'AlignConst', 'DC':'DesignConst', 'LV':'LocalVar', 'F':'Fault'}
-ConstantTypeDict = {'DC':0, 'AC':1}
 ID_PREFIX = ''
 
 class Data:
@@ -38,8 +37,7 @@ class Data:
     @classmethod
     def ConvertStringToData(cls, fullstring, majorID, minorID):
         ''' 
-        ---------------------------------------------------------------------------------------------------------
-        ConvertStringToData:
+        class Data - ConvertStringToData:
         The ConvertStringToData is a classmethod for class Data.  It will return a 'Data' class with member
         variables populated with real data after having parsed through the string argument to this method.
         It has four arguments, one of which is the class Data itself, since it is a classmethod.  The other three
@@ -50,9 +48,9 @@ class Data:
         1. The section ID will be equal the majorID argument.
         2. The object ID will be equal to the minorID argument to this method.
         3. The full string is updated to remove all spaces.
-        4. Regular expression patterns are defined to determine the name, data type, and source (for inputs).  
+        4. Regular expression patterns are defined to determine the name, data type, and abbreviated data type.
         5. String searches with the regular expression patterns are performed to determine member values.
-        ---------------------------------------------------------------------------------------------------------
+        
         '''
         sectionID = majorID
         objectID = minorID
@@ -102,10 +100,9 @@ class Input(Data):
     @classmethod
     def ConvertStringToData(cls, fullstring, majorID, minorID):
         ''' 
-        ---------------------------------------------------------------------------------------------------------
-        ConvertStringToData:
-        TBD
-        ---------------------------------------------------------------------------------------------------------
+        class Input - ConvertStringToData:
+        Parses through the fullstring and uses ID arguments to return a class instance of Input.
+        
         '''
         sectionID = majorID
         objectID = minorID
@@ -158,10 +155,9 @@ class Output(Data):
     @classmethod
     def ConvertStringToData(cls, fullstring, majorID, minorID):
         ''' 
-        ---------------------------------------------------------------------------------------------------------
-        ConvertStringToData:
-        TBD
-        ---------------------------------------------------------------------------------------------------------
+        class Output - ConvertStringToData:
+        Parses through the fullstring and uses ID arguments to return a class instance of Output.
+        
         '''
         sectionID = majorID
         objectID = minorID
@@ -246,9 +242,9 @@ class Constant(Data):
     @classmethod
     def ConvertStringToData(cls, fullstring, majorID, minorID):
         ''' 
-        ---------------------------------------------------------------------------------------------------------
-        ConvertStringToData:
-        ---------------------------------------------------------------------------------------------------------
+        class Constant - ConvertStringToData:
+        Parses through the fullstring and uses ID arguments to return a class instance of Constant.
+        
         '''
         sectionID = majorID
         objectID = minorID
@@ -280,9 +276,9 @@ class Constant(Data):
 
         # Determine the type of constant (Align or Design)
         if fullstring.startswith('AC'):
-            const_type = ConstantTypeDict.get('AC')
+            const_type = 'AC'
         else:
-            const_type = ConstantTypeDict.get('DC')
+            const_type = 'DC'
 
         # Determine the units for this constant.
         units = 'tbd'
@@ -301,10 +297,11 @@ class LocalVariable(Data):
         super().__init__(sectionID, objectID, name, vi_name, datatype, datatype_abbreviated)
 
 class Fault:
-    def __init__(self, sectionID, objectID, faultname, faultcode, faultdescr, faultcumlimit, faultconlimit):
+    def __init__(self, sectionID, objectID, faultname, vi_name, faultcode, faultdescr, faultcumlimit, faultconlimit):
         self.sectionID = sectionID
         self.objectID = objectID
         self.faultname = faultname
+        self.vi_name = vi_name
         self.faultcode = faultcode
         self.faultdescr = faultdescr
         self.faultcumlimit = faultcumlimit
@@ -312,6 +309,11 @@ class Fault:
     
     @classmethod
     def ConvertStringToFault(cls, fullstring, majorID, minorID):
+        ''' 
+        class Fault - ConvertStringToFault:
+        Parses through the fullstring and uses ID arguments to return a class instance of Fault.
+        
+        '''
         
         # Define the Object ID
         sectionID = majorID
@@ -327,8 +329,10 @@ class Fault:
         matched_string = faultname_pattern.search(string_no_spaces)
         if matched_string: 
             faultname = matched_string[1]
+            vi_name = sectionID + '_' + faultname
         else:
-            faultname = 'UNKNOWN'
+            faultname = 'UNKNOWN FAULT NAME'
+            vi_name = 'UNKNOWN VI_NAME'
 
         # Code
         matched_string = faultcode_pattern.search(string_no_spaces)
@@ -346,4 +350,4 @@ class Fault:
         # Consecutive Limit
         faultconlimit = string_no_spaces.split('\"')[2].split(',')[2].split(')')[0].strip()
 
-        return cls(sectionID, objectID, faultname, faultcode, faultdescr, faultcumlimit, faultconlimit)
+        return cls(sectionID, objectID, faultname, vi_name, faultcode, faultdescr, faultcumlimit, faultconlimit)

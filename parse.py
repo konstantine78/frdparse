@@ -9,22 +9,20 @@ from ioparse import Fault as fault_data
 
 def parse_export_file(path, id_prefix):
     '''
-    ----------------------------------------------------------------------------------------------------------------------------
-    The parse_export_file function takes two arguments, path and id prefix.  This is used downstream to aid in 
-    parsing through a text file located in 'path' and searching for the id prefix.  Steps in this function are:
+    parse_export_file(path, id_prefix): This is used downstream to aid in parsing through a text file located in 'path' 
+    and searching for the id_prefix.  Steps in this function are:
     1. Open the exported text file.  Note, all opening of files is performed with context managers.
-    2. Remove empty lines and copy the conntents into a temporary file, 'output.txt'.
-    3. Open 'output.txt' and declare local lists that will retain class instances of Class Signal from ioparse.py.
+    2. Remove empty lines and copy the contents into a temporary file.
+    3. Open 'output.txt' and declare local lists.
     4. Loop through the text file using the object identifier as a point of reference.  The assumption is that the object id
-    is at the beginning of the "section of text" in question, whether it be Data definition or conditional statements.  We want
+    is at the beginning of the "section of text" in question, whether it be data definition or conditional statements.  We want
     to loop through, identify those objects that represent Data and then further loop through statements to create
     our lists of Data (or sub-classes to Data) and Fault class instances.  
     5. Parsing is performed mostly via regular expression matched strings and general string manipulation.  At the heart of 
     the parsing are the classmethods that are called from module ioparse.  These methods are custom classmethods
     and will return the class, Data (or Fault), from ioparse and allow for instantiation local to parse.py.  
-    6. Once the lists are updated, and parsing has ceased, the lists are then written out to a *.csv file for archiving/use.
-    7. Temporary files are then deleted and the lists are returned once the method has completed running.
-    ----------------------------------------------------------------------------------------------------------------------------
+    6. Once the lists are updated, method calls to the user_defined module are made for generating files and cleanup.
+    
     '''
     path = path+'/'
     ioparse.ID_PREFIX = id_prefix
@@ -82,6 +80,6 @@ def parse_export_file(path, id_prefix):
     # Return the lists for use downstream in creation of mysql database.
     return inputs, outputs, constants, faults
 
-# This is used to run the file on its own without GUI.
+# DO NOT DELETE THIS.  These lines exist in case you want to troubleshoot w/out a GUI (i.e., run command line)
 #path = 'C:/Users/kostas/Documents/GitHub/frdparse/exporttextfiles/'
 #parse_export_file(path, 'APPSW')
